@@ -32,7 +32,7 @@ module JekyllReadmeIndex
 
     def page
       base = readme.instance_variable_get("@base")
-      dir = readme.instance_variable_get("@dir")
+      dir  = readme.instance_variable_get("@dir")
       name = readme.instance_variable_get("@name")
       page = Jekyll::Page.new(site, base, dir, name)
       page.data["permalink"] = "/"
