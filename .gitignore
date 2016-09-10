@@ -1,0 +1,4 @@
+spec/examples.txt
+_site
+*.gem
+Gemfile.lock
