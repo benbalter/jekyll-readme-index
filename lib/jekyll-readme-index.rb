@@ -1,5 +1,5 @@
 require "jekyll"
+require "jekyll-readme-index/generator"
 
 module JekyllReadmeIndex
-  autoload :Generator, "jekyll-readme-index/generator"
 end
