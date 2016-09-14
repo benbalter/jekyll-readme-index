@@ -35,10 +35,19 @@ describe JekyllReadmeIndex::Generator do
       expect(site.pages.map(&:url)).to include("/")
     end
 
-    it "writes the index" do
-      site.process
-      path = File.join(site.dest, "index.html")
-      expect(path).to be_an_existing_file
+    context "building" do
+      before { site.process }
+      let(:path) { File.join(site.dest, "index.html") }
+      let(:content) { File.read(path) }
+
+      it "writes the index" do
+        expect(path).to be_an_existing_file
+      end
+
+      it "renders the markdown to HTML" do
+        expected = "<h1 id=\"jekyll-readme-index\">Jekyll Readme Index</h1>\n"
+        expect(content).to eql(expected)
+      end
     end
   end
 
@@ -60,10 +69,19 @@ describe JekyllReadmeIndex::Generator do
       expect(site.pages.map(&:name)).to_not include("README.md")
     end
 
-    it "writes the index" do
-      site.process
-      path = File.join(site.dest, "index.html")
-      expect(path).to be_an_existing_file
+    context "building" do
+      before { site.process }
+      let(:path) { File.join(site.dest, "index.html") }
+      let(:content) { File.read(path) }
+
+      it "writes the index" do
+        expect(path).to be_an_existing_file
+      end
+
+      it "renders the markdown to HTML" do
+        expected = "<h1 id=\"index\">Index</h1>\n"
+        expect(content).to eql(expected)
+      end
     end
   end
 
@@ -78,10 +96,13 @@ describe JekyllReadmeIndex::Generator do
       expect(index?).to eql(false)
     end
 
-    it "doesn't write an index" do
-      site.process
-      path = File.join(site.dest, "index.html")
-      expect(path).to_not be_an_existing_file
+    context "building" do
+      before { site.process }
+      let(:path) { File.join(site.dest, "index.html") }
+
+      it "doesn't write an index" do
+        expect(path).to_not be_an_existing_file
+      end
     end
   end
 
@@ -96,10 +117,19 @@ describe JekyllReadmeIndex::Generator do
       expect(index?).to eql(true)
     end
 
-    it "writes the index" do
-      site.process
-      path = File.join(site.dest, "index.html")
-      expect(path).to be_an_existing_file
+    context "building" do
+      before { site.process }
+      let(:path) { File.join(site.dest, "index.html") }
+      let(:content) { File.read(path) }
+
+      it "writes the index" do
+        expect(path).to be_an_existing_file
+      end
+
+      it "renders the markdown to HTML" do
+        expected = "<h1>Index</h1>\n"
+        expect(content).to eql(expected)
+      end
     end
   end
 end

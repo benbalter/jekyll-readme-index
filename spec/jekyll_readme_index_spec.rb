@@ -1,2 +1,0 @@
-describe JekyllReadmeIndex do
-end

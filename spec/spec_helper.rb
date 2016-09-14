@@ -20,6 +20,8 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 end
 
+Jekyll.logger.adjust_verbosity(:quiet => true)
+
 def fixture_path(fixture)
   File.expand_path "./fixtures/#{fixture}", File.dirname(__FILE__)
 end
