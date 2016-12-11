@@ -1,7 +1,7 @@
 module JekyllReadmeIndex
   class Generator < Jekyll::Generator
     README_REGEX = %r!^/readme(\.[^.]+)?$!i
-    INDEX_REGEX = %r!^/index.html?$!i
+    INDEX_REGEX = %r!^/($|index\.html?$)!i
 
     attr_accessor :site
 
@@ -26,8 +26,7 @@ module JekyllReadmeIndex
     end
 
     def index?
-      site.pages.any? { |page| page.url == "/" } ||
-        site.static_files.any? { |file| file.url =~ INDEX_REGEX }
+      (site.pages + site.static_files).any? { |file| file.url =~ INDEX_REGEX }
     end
 
     def page
