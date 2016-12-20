@@ -216,4 +216,60 @@ describe JekyllReadmeIndex::Generator do
       end
     end
   end
+
+  context "with an XML index" do
+    let(:fixture) { "xml-index" }
+
+    it "knows there's an index" do
+      expect(index?).to eql(true)
+    end
+
+    it "doesn't overwrite the index" do
+      generator.generate(site)
+      expect(site.pages.map(&:name)).to_not include("README.md")
+    end
+
+    context "building" do
+      before { site.process }
+      let(:path) { File.join(site.dest, "index.xml") }
+      let(:content) { File.read(path) }
+
+      it "writes the index" do
+        expect(path).to be_an_existing_file
+      end
+
+      it "renders the index as the index" do
+        expected = "<test>\n  XML Index\n</test>\n"
+        expect(content).to match(expected)
+      end
+    end
+  end
+
+  context "with an XHTML index" do
+    let(:fixture) { "xhtml-index" }
+
+    it "knows there's an index" do
+      expect(index?).to eql(true)
+    end
+
+    it "doesn't overwrite the index" do
+      generator.generate(site)
+      expect(site.pages.map(&:name)).to_not include("README.md")
+    end
+
+    context "building" do
+      before { site.process }
+      let(:path) { File.join(site.dest, "index.xhtml") }
+      let(:content) { File.read(path) }
+
+      it "writes the index" do
+        expect(path).to be_an_existing_file
+      end
+
+      it "renders the index as the index" do
+        expected = "<h1 id=\"xhtml-index\">XHTML Index</h1>\n"
+        expect(content).to eql(expected)
+      end
+    end
+  end
 end
