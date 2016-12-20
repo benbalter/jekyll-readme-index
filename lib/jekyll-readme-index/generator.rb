@@ -1,7 +1,7 @@
 module JekyllReadmeIndex
   class Generator < Jekyll::Generator
     README_REGEX = %r!^/readme(\.[^.]+)?$!i
-    INDEX_REGEX = %r!^/($|index\.(html?|xml)$)!i
+    INDEX_REGEX = %r!^/($|index\.(html?|xhtml|xml)$)!i
 
     attr_accessor :site
 
