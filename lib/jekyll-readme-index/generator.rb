@@ -1,7 +1,7 @@
 module JekyllReadmeIndex
   class Generator < Jekyll::Generator
     README_REGEX = %r!^/readme(\.[^.]+)?$!i
-    INDEX_REGEX = %r!^/($|index\.(html?|xhtml|xml)$)!i
+    READMES_REGEX = %r!/readme(\.[^.]+)?$!i
 
     attr_accessor :site
 
@@ -15,8 +15,10 @@ module JekyllReadmeIndex
     def generate(site)
       @site = site
 
-      return if index? || readme.nil?
-      site.pages << page
+      for readme in readmes do
+        next if relative_index?(readme)
+        site.pages << relative_page(readme)
+      end
     end
 
     private
@@ -26,16 +28,40 @@ module JekyllReadmeIndex
     end
 
     def index?
-      (site.pages + site.static_files).any? { |file| file.url =~ INDEX_REGEX }
+      relative_index?(readme)
     end
 
     def page
+      relative_page(readme)
+    end
+
+    def readmes
+      site.static_files.each_with_object([]) do |file,memo|
+        memo << file if file.relative_path =~ READMES_REGEX
+      end
+    end
+
+    def relative_index?(readme)
+      if readme
+        name = readme.instance_variable_get("@name")
+        relative_path = readme.relative_path.sub(/#{name}$/, '')
+      else
+        relative_path = '/'
+      end
+      index_regex = %r!^#{relative_path}($|index\.(html?|xhtml|xml)$)!i
+      (site.pages + site.static_files).any? { |file| file.url =~ index_regex }
+    end
+
+    def relative_page(readme)
+      return unless readme
       base = readme.instance_variable_get("@base")
       dir  = readme.instance_variable_get("@dir")
       name = readme.instance_variable_get("@name")
+      relative_path = readme.relative_path.sub(/#{name}$/, '')
       page = Jekyll::Page.new(site, base, dir, name)
-      page.data["permalink"] = "/"
+      page.data["permalink"] = relative_path
       page
     end
+
   end
 end

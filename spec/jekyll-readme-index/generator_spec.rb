@@ -272,4 +272,92 @@ describe JekyllReadmeIndex::Generator do
       end
     end
   end
+
+  context "with a readme and nested readme" do
+    let(:fixture) { "readme-and-nested-readme" }
+
+    it "knows there's a readme" do
+      expect(readme).to_not be_nil
+      expect(readme.class).to eql(Jekyll::StaticFile)
+      expect(readme.relative_path).to eql("/README.md")
+    end
+
+    it "knows there's no index" do
+      expect(index?).to eql(false)
+    end
+
+    it "builds the index page" do
+      expect(page.class).to eql(Jekyll::Page)
+      expect(page.content).to eql("# Top-level Readme Index\n")
+      expect(page.url).to eql("/")
+    end
+
+    it "creates the index page" do
+      generator.generate(site)
+      expect(site.pages.map(&:name)).to include("README.md")
+      expect(site.pages.map(&:url)).to include("/")
+    end
+
+    context "building" do
+      before { site.process }
+
+      it "collects all readmes" do
+        expect(generator.site.static_files.size).to eql(7)
+        expect(generator.site.pages.size).to eql(2)
+      end
+
+      describe "/" do
+        let(:path) { File.join(site.dest, "index.html") }
+        let(:content) { File.read(path) }
+
+        it "writes the index" do
+          expect(path).to be_an_existing_file
+        end
+
+        it "renders the markdown to HTML" do
+          expected = "<h1 id=\"top-level-readme-index\">Top-level Readme Index</h1>\n"
+          expect(content).to eql(expected)
+        end
+      end
+
+      describe "/with_readme/" do
+        let(:path) { File.join(site.dest, "/with_readme/", "index.html") }
+        let(:content) { File.read(path) }
+
+        it "writes the index" do
+          expect(path).to be_an_existing_file
+        end
+
+        it "renders the markdown to HTML" do
+          expected = "<h1 id=\"second-level-readme-index---about\">Second-level Readme Index - About</h1>\n"
+          expect(content).to eql(expected)
+        end
+      end
+
+      describe "/with_readme_and_index/" do
+        let(:path) { File.join(site.dest, "/with_readme_and_index/", "index.html") }
+        let(:content) { File.read(path) }
+
+        it "writes the index" do
+          expect(path).to be_an_existing_file
+        end
+
+        it "renders the markdown to HTML" do
+          expected = "<h1 id=\"index2\">Second-level Index</h1>\n"
+          expect(content).to eql(expected)
+        end
+      end
+
+      describe "/without_readme/" do
+        let(:path) { File.join(site.dest, "/without_readme/", "index.html") }
+        let(:content) { File.read(path) }
+
+        it "doesn't write an index" do
+          expect(path).to_not be_an_existing_file
+        end
+      end
+
+    end
+  end
+
 end
