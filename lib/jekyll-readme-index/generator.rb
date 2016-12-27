@@ -62,6 +62,5 @@ module JekyllReadmeIndex
       page.data["permalink"] = relative_path
       page
     end
-
   end
 end
