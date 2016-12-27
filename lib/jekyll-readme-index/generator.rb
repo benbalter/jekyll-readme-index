@@ -2,6 +2,7 @@ module JekyllReadmeIndex
   class Generator < Jekyll::Generator
     README_REGEX = %r!^/readme(\.[^.]+)?$!i
     READMES_REGEX = %r!/readme(\.[^.]+)?$!i
+    INDEX_MATCH_PATTERN = "($|index\.(html?|xhtml|xml)$)".freeze
 
     attr_accessor :site
 
@@ -46,7 +47,7 @@ module JekyllReadmeIndex
       else
         relative_path = "/"
       end
-      index_regex = %r!^#{relative_path}($|index\.(html?|xhtml|xml)$)!i
+      index_regex = %r!^#{relative_path}#{INDEX_MATCH_PATTERN}!i
       (site.pages + site.static_files).any? { |file| file.url =~ index_regex }
     end
 
