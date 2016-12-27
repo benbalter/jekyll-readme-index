@@ -329,7 +329,8 @@ describe JekyllReadmeIndex::Generator do
         end
 
         it "renders the markdown to HTML" do
-          expected = "<h1 id=\"second-level-readme-index---about\">Second-level Readme Index - About</h1>\n"
+          expected = "<h1 id=\"second-level-readme-index---about\">" \
+            "Second-level Readme Index - About</h1>\n"
           expect(content).to eql(expected)
         end
       end
@@ -356,8 +357,6 @@ describe JekyllReadmeIndex::Generator do
           expect(path).to_not be_an_existing_file
         end
       end
-
     end
   end
-
 end
