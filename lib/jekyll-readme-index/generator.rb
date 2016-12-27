@@ -36,9 +36,7 @@ module JekyllReadmeIndex
     end
 
     def readmes
-      site.static_files.each_with_object([]) do |file, memo|
-        memo << file if file.relative_path =~ READMES_REGEX
-      end
+      site.static_files.select { |file| file.relative_path =~ READMES_REGEX }
     end
 
     def relative_index?(readme)
