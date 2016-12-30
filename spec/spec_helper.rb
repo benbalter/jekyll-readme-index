@@ -34,3 +34,5 @@ end
 RSpec::Matchers.define :be_an_existing_file do
   match { |path| File.exist?(path) }
 end
+
+fixture_site("readme-no-index").process

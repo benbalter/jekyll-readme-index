@@ -1,8 +1,6 @@
 module JekyllReadmeIndex
   class Generator < Jekyll::Generator
-    README_REGEX = %r!^/readme(\.[^.]+)?$!i
-    READMES_REGEX = %r!/readme(\.[^.]+)?$!i
-    INDEX_MATCH_PATTERN = "($|index\.(html?|xhtml|xml)$)".freeze
+    INDEX_REGEX = %r!$|index\.(html?|xhtml|xml)$!i
 
     attr_accessor :site
 
@@ -17,49 +15,40 @@ module JekyllReadmeIndex
       @site = site
 
       readmes.each do |readme|
-        next if relative_index?(readme)
-        site.pages << relative_page(readme)
+        next unless should_be_index?(readme)
+        site.pages << readme.to_page
       end
     end
 
     private
 
-    def readme
-      site.static_files.find { |file| file.relative_path =~ README_REGEX }
-    end
-
-    def index?
-      relative_index?(readme)
-    end
-
-    def page
-      relative_page(readme)
-    end
-
+    # Returns an array of all READMEs as StaticFiles
     def readmes
-      site.static_files.select { |file| file.relative_path =~ READMES_REGEX }
+      site.static_files.select { |file| file.relative_path =~ readme_regex }
     end
 
-    def relative_index?(readme)
-      if readme
-        name = readme.instance_variable_get("@name")
-        relative_path = readme.relative_path.sub(%r!#{name}$!, "")
-      else
-        relative_path = "/"
-      end
-      index_regex = %r!^#{relative_path}#{INDEX_MATCH_PATTERN}!i
-      (site.pages + site.static_files).any? { |file| file.url =~ index_regex }
+    # Should the given readme be the containing directory's index?
+    def should_be_index?(readme)
+      return false unless readme
+      !dir_has_index? File.dirname(readme.url)
     end
 
-    def relative_page(readme)
-      return unless readme
-      base = readme.instance_variable_get("@base")
-      dir  = readme.instance_variable_get("@dir")
-      name = readme.instance_variable_get("@name")
-      relative_path = readme.relative_path.sub(%r!#{name}$!, "")
-      page = Jekyll::Page.new(site, base, dir, name)
-      page.data["permalink"] = relative_path
-      page
+    # Does the given directory have an index?
+    #
+    # relative_path - the directory path relative to the site root
+    def dir_has_index?(relative_path)
+      relative_path << "/" unless relative_path.end_with? "/"
+      regex = %r!^#{Regexp.escape(relative_path)}#{INDEX_REGEX}!i
+      (site.pages + site.static_files).any? { |file| file.url =~ regex }
+    end
+
+    # Regexp to match a file path against to detect if the given file is a README
+    def readme_regex
+      @readmes_regex ||= %r!/readme(#{Regexp.union(markdown_converter.extname_list)})$!i
+    end
+
+    def markdown_converter
+      @markdown_converter ||= site.find_converter_instance(Jekyll::Converters::Markdown)
     end
   end
 end
