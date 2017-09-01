@@ -1,5 +1,6 @@
 describe JekyllReadmeIndex::Generator do
-  let(:site) { fixture_site(fixture) }
+  let(:overrides) { {} }
+  let(:site) { fixture_site(fixture, overrides) }
   let(:readmes) { subject.send(:readmes) }
   let(:dir) { "/" }
   let(:index?) { subject.send(:dir_has_index?, dir) }
@@ -439,6 +440,119 @@ describe JekyllReadmeIndex::Generator do
 
         it "doesn't write the index" do
           expect(index_path).to_not be_an_existing_file
+        end
+      end
+    end
+  end
+
+  context "cleanup" do
+    let(:overrides) { { "readme_index" => { "remove_originals" => true } } }
+
+    context "with a single README" do
+      context "with a readme and no index" do
+        let(:fixture) { "readme-no-index" }
+
+        it "creates the index page" do
+          subject.generate(site)
+          expect(site.pages.map(&:name)).to include("README.md")
+          expect(site.pages.map(&:url)).to include("/")
+        end
+
+        it "removes the readme file" do
+          subject.generate(site)
+          expect(site.static_files.map(&:relative_path)).to_not include("/README.md")
+        end
+      end
+
+      context "with a readme and an index" do
+        let(:fixture) { "readme-and-index" }
+
+        it "doesn't overwrite the index" do
+          subject.generate(site)
+          expect(site.pages.map(&:name)).to_not include("readme.markdown")
+        end
+
+        it "doesn't remove the readme file" do
+          subject.generate(site)
+          expect(site.static_files.map(&:relative_path)).to include("/readme.markdown")
+        end
+      end
+
+      context "with a readme and a static HTML index" do
+        let(:fixture) { "readme-and-html-index" }
+
+        it "doesn't overwrite the index" do
+          subject.generate(site)
+          expect(site.pages.map(&:name)).to_not include("readme.markdown")
+        end
+
+        it "doesn't remove the readme file" do
+          subject.generate(site)
+          expect(site.static_files.map(&:relative_path)).to include("/readme.markdown")
+        end
+      end
+
+      context "with a readme and a HTML index page" do
+        let(:fixture) { "readme-and-html-page-index" }
+
+        it "doesn't overwrite the index" do
+          subject.generate(site)
+          expect(site.pages.map(&:name)).to_not include("readme.markdown")
+        end
+
+        it "doesn't remove the readme file" do
+          subject.generate(site)
+          expect(site.static_files.map(&:relative_path)).to include("/readme.markdown")
+        end
+      end
+
+      context "with a readme and an explicit permalink index" do
+        let(:fixture) { "readme-and-index-permalink" }
+
+        it "doesn't overwrite the index" do
+          subject.generate(site)
+          expect(site.pages.map(&:name)).to_not include("readme.markdown")
+        end
+
+        it "doesn't remove the readme file" do
+          subject.generate(site)
+          expect(site.static_files.map(&:relative_path)).to include("/readme.markdown")
+        end
+      end
+    end
+
+    context "with multiple readmes" do
+      let(:fixture) { "readme-and-nested-readme" }
+
+      context "the root directory" do
+        let(:dir) { "/" }
+
+        it "creates the index page" do
+          subject.generate(site)
+          expect(site.pages.map(&:name)).to include("README.md")
+          expect(site.pages.map(&:url)).to include("/")
+        end
+
+        it "does remove the root readme file" do
+          subject.generate(site)
+          readme = "/readme.markdown"
+          expect(site.static_files.map(&:relative_path)).to_not include(readme)
+        end
+      end
+
+      context "a subfolder with a readme" do
+        let(:dir) { "/with_readme/" }
+
+        it "creates the index page" do
+          subject.generate(site)
+          expect(site.pages.map(&:name)).to include("README.md")
+          expect(site.pages.map(&:url)).to include(dir)
+        end
+
+        it "does remove the subfolder readme file" do
+          subject.generate(site)
+          readme = "/with_readme/readme.markdown"
+          expect(site.static_files.map(&:relative_path)).to_not include(readme)
         end
       end
     end
