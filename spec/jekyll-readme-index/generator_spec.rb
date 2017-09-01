@@ -557,4 +557,26 @@ describe JekyllReadmeIndex::Generator do
       end
     end
   end
+
+  context "when disabled" do
+    let(:fixture) { "readme-no-index" }
+    let(:overrides) { { "readme_index" => { "disabled" => true } } }
+
+    it "doesn't create the index page" do
+      subject.generate(site)
+      expect(site.pages.map(&:name)).to_not include("README.md")
+      expect(site.pages.map(&:url)).to_not include("/")
+    end
+  end
+
+  context "when explicitly enabled" do
+    let(:fixture) { "readme-no-index" }
+    let(:overrides) { { "readme_index" => { "disabled" => false } } }
+
+    it "does create the index page" do
+      subject.generate(site)
+      expect(site.pages.map(&:name)).to include("README.md")
+      expect(site.pages.map(&:url)).to include("/")
+    end
+  end
 end
