@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-$:.unshift File.expand_path('../lib', __FILE__)
-require 'jekyll-readme-index/version'
+$LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
+require "jekyll-readme-index/version"
 
 Gem::Specification.new do |s|
   s.name          = "jekyll-readme-index"
@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
 
   s.files         = `git ls-files app lib`.split("\n")
   s.platform      = Gem::Platform::RUBY
-  s.require_paths = ['lib']
+  s.require_paths = ["lib"]
   s.license       = "MIT"
 
   s.add_runtime_dependency "jekyll", "~> 3.0"
