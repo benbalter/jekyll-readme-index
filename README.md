@@ -37,7 +37,7 @@ readme_index:
 
 ### Removing originals
 
-By default the original README markdown files will be included as static pages in the output. To remove them from the output, set the `remove_originals` key to a truthy value.
+By default the original README markdown files will be included as static pages in the output. To remove them from the output, set the `remove_originals` key to `true`.
 
 ### Disabling
 

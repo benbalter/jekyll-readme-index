@@ -66,7 +66,7 @@ module JekyllReadmeIndex
     end
 
     def cleanup?
-      option(CLEANUP_KEY)
+      option(CLEANUP_KEY) == true
     end
   end
 end
