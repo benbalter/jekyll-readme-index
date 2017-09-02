@@ -8,7 +8,7 @@ module JekyllReadmeIndex
     priority :low
 
     CONFIG_KEY = "readme_index".freeze
-    DISABLED_KEY = "disabled".freeze
+    ENABLED_KEY = "enabled".freeze
     CLEANUP_KEY = "remove_originals".freeze
 
     def initialize(site)
@@ -62,7 +62,7 @@ module JekyllReadmeIndex
     end
 
     def disabled?
-      option(DISABLED_KEY)
+      option(ENABLED_KEY) == false
     end
 
     def cleanup?

@@ -560,7 +560,7 @@ describe JekyllReadmeIndex::Generator do
 
   context "when disabled" do
     let(:fixture) { "readme-no-index" }
-    let(:overrides) { { "readme_index" => { "disabled" => true } } }
+    let(:overrides) { { "readme_index" => { "enabled" => false } } }
 
     it "doesn't create the index page" do
       subject.generate(site)
@@ -571,7 +571,7 @@ describe JekyllReadmeIndex::Generator do
 
   context "when explicitly enabled" do
     let(:fixture) { "readme-no-index" }
-    let(:overrides) { { "readme_index" => { "disabled" => false } } }
+    let(:overrides) { { "readme_index" => { "enabled" => true } } }
 
     it "does create the index page" do
       subject.generate(site)

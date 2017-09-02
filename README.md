@@ -31,8 +31,8 @@ Configuration options are optional are placed in `_config.yml` under the `readme
 
 ```yml
 readme_index:
+  enabled:          true
   remove_originals: false
-  disabled:         false
 ```
 
 ### Removing originals
@@ -41,4 +41,4 @@ By default the original README markdown files will be included as static pages i
 
 ### Disabling
 
-Even if the plugin is enabled (e.g., via the `:jekyll_plugins` group in your Gemfile) you can disable it by setting the `disabled` key.
+Even if the plugin is enabled (e.g., via the `:jekyll_plugins` group in your Gemfile) you can disable it by setting the `enabled` key to `false`.
