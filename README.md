@@ -24,3 +24,21 @@ If you have a readme file, and your site doesn't otherwise have an index file, t
   gems:
     - jekyll-readme-index
   ```
+
+## Configuration
+
+Configuration options are optional are placed in `_config.yml` under the `readme_index` key. They default to:
+
+```yml
+readme_index:
+  enabled:          true
+  remove_originals: false
+```
+
+### Removing originals
+
+By default the original README markdown files will be included as static pages in the output. To remove them from the output, set the `remove_originals` key to `true`.
+
+### Disabling
+
+Even if the plugin is enabled (e.g., via the `:jekyll_plugins` group in your Gemfile) you can disable it by setting the `enabled` key to `false`.

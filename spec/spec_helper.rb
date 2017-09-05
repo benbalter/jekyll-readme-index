@@ -26,8 +26,10 @@ def fixture_path(fixture)
   File.expand_path "./fixtures/#{fixture}", File.dirname(__FILE__)
 end
 
-def fixture_site(fixture)
-  config = Jekyll.configuration("source" => fixture_path(fixture))
+def fixture_site(fixture, override = {})
+  default_config = { "source" => fixture_path(fixture) }
+  config = Jekyll::Utils.deep_merge_hashes(default_config, override)
+  config = Jekyll.configuration(config)
   Jekyll::Site.new(config)
 end
 

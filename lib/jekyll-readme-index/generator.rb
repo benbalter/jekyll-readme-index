@@ -7,16 +7,22 @@ module JekyllReadmeIndex
     safe true
     priority :low
 
+    CONFIG_KEY = "readme_index".freeze
+    ENABLED_KEY = "enabled".freeze
+    CLEANUP_KEY = "remove_originals".freeze
+
     def initialize(site)
       @site = site
     end
 
     def generate(site)
       @site = site
+      return if disabled?
 
       readmes.each do |readme|
         next unless should_be_index?(readme)
         site.pages << readme.to_page
+        site.static_files.delete(readme) if cleanup?
       end
     end
 
@@ -49,6 +55,18 @@ module JekyllReadmeIndex
 
     def markdown_converter
       @markdown_converter ||= site.find_converter_instance(Jekyll::Converters::Markdown)
+    end
+
+    def option(key)
+      site.config[CONFIG_KEY] && site.config[CONFIG_KEY][key]
+    end
+
+    def disabled?
+      option(ENABLED_KEY) == false
+    end
+
+    def cleanup?
+      option(CLEANUP_KEY) == true
     end
   end
 end
