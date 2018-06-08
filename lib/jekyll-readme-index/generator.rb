@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module JekyllReadmeIndex
   class Generator < Jekyll::Generator
     INDEX_REGEX = %r!$|index\.(html?|xhtml|xml)$!i
@@ -50,7 +52,7 @@ module JekyllReadmeIndex
 
     # Regexp to match a file path against to detect if the given file is a README
     def readme_regex
-      @readmes_regex ||= %r!/readme(#{Regexp.union(markdown_converter.extname_list)})$!i
+      @readme_regex ||= %r!/readme(#{Regexp.union(markdown_converter.extname_list)})$!i
     end
 
     def markdown_converter
