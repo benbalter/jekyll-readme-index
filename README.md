@@ -21,9 +21,10 @@ If you have a readme file, and your site doesn't otherwise have an index file, t
 2. Add the follow to your site's config
 
   ```yml
-  gems:
+  plugins:
     - jekyll-readme-index
   ```
+  Note: If you are using a Jekyll version less than 3.5.0, use the `gems` key instead of `plugins`.
 
 ## Configuration
 
