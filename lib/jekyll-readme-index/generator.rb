@@ -12,6 +12,7 @@ module JekyllReadmeIndex
     CONFIG_KEY = "readme_index".freeze
     ENABLED_KEY = "enabled".freeze
     CLEANUP_KEY = "remove_originals".freeze
+    FRONTMATTER_KEY = "with_frontmatter".freeze
 
     def initialize(site)
       @site = site
@@ -26,6 +27,13 @@ module JekyllReadmeIndex
         site.pages << readme.to_page
         site.static_files.delete(readme) if cleanup?
       end
+
+      if with_frontmatter?
+        readmes_with_frontmatter.each do |readme|
+          next unless should_be_index?(readme)
+          readme.update_permalink
+        end
+      end
     end
 
     private
@@ -33,6 +41,10 @@ module JekyllReadmeIndex
     # Returns an array of all READMEs as StaticFiles
     def readmes
       site.static_files.select { |file| file.relative_path =~ readme_regex }
+    end
+
+    def readmes_with_frontmatter
+      site.pages.select { |file| ("/" + file.path) =~ readme_regex }
     end
 
     # Should the given readme be the containing directory's index?
@@ -69,6 +81,10 @@ module JekyllReadmeIndex
 
     def cleanup?
       option(CLEANUP_KEY) == true
+    end
+
+    def with_frontmatter?
+      option(FRONTMATTER_KEY) == true
     end
   end
 end

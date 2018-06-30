@@ -2,9 +2,13 @@ describe JekyllReadmeIndex::Generator do
   let(:overrides) { {} }
   let(:site) { fixture_site(fixture, overrides) }
   let(:readmes) { subject.send(:readmes) }
+  let(:readmes_with_frontmatter) { subject.send(:readmes_with_frontmatter) }
   let(:dir) { "/" }
   let(:index?) { subject.send(:dir_has_index?, dir) }
   let(:readme) { readmes.find { |r| r.url =~ %r!#{dir}README\..*!i } }
+  let(:readme_with_frontmatter) do
+    readmes_with_frontmatter.find { |r| r.url =~ %r!#{dir}README\..*!i }
+  end
   let(:page) { readme.to_page }
   let(:should_be_index?) { subject.send(:should_be_index?, readme) }
   let(:index_name) { "index.html" }
@@ -441,6 +445,26 @@ describe JekyllReadmeIndex::Generator do
         it "doesn't write the index" do
           expect(index_path).to_not be_an_existing_file
         end
+      end
+    end
+  end
+
+  context "with frontmatter" do
+    let(:overrides) { { "readme_index" => { "with_frontmatter" => true } } }
+
+    context "with a single README" do
+      let(:fixture) { "readme-with-frontmatter" }
+
+      it "knows there's a readme" do
+        expect(readme_with_frontmatter).to_not be_nil
+        expect(readme_with_frontmatter.class).to eql(Jekyll::Page)
+        expect(readme_with_frontmatter.path).to eql("README.md")
+      end
+
+      it "creates the index page" do
+        subject.generate(site)
+        expect(site.pages.map(&:name)).to include("README.md")
+        expect(site.pages.map(&:url)).to include("/")
       end
     end
   end
