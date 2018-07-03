@@ -9,4 +9,15 @@ module Jekyll
       page
     end
   end
+
+  class Page
+    def update_permalink
+      data["permalink"] = File.dirname(url) + "/"
+      @url = URL.new(
+        :template     => template,
+        :placeholders => url_placeholders,
+        :permalink    => permalink
+      ).to_s
+    end
+  end
 end
