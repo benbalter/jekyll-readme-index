@@ -34,6 +34,7 @@ Configuration options are optional are placed in `_config.yml` under the `readme
 readme_index:
   enabled:          true
   remove_originals: false
+  with_frontmatter: false
 ```
 
 ### Removing originals
