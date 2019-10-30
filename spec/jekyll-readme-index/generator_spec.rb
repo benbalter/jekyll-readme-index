@@ -1,4 +1,8 @@
+# frozen_string_literal: true
+
 describe JekyllReadmeIndex::Generator do
+  subject { described_class.new(site) }
+
   let(:overrides) { {} }
   let(:site) { fixture_site(fixture, overrides) }
   let(:readmes) { subject.send(:readmes) }
@@ -15,9 +19,7 @@ describe JekyllReadmeIndex::Generator do
   let(:index_path) { File.join(site.dest, dir, index_name) }
   let(:index_content) { File.read(index_path) if File.exist?(index_path) }
 
-  subject { described_class.new(site) }
-
-  before(:each) do
+  before do
     site.reset
     site.read
   end
@@ -27,17 +29,17 @@ describe JekyllReadmeIndex::Generator do
       let(:fixture) { "readme-no-index" }
 
       it "knows there's a readme" do
-        expect(readme).to_not be_nil
+        expect(readme).not_to be_nil
         expect(readme.class).to eql(Jekyll::StaticFile)
         expect(readme.relative_path).to eql("/README.md")
       end
 
       it "knows there's no index" do
-        expect(index?).to eql(false)
+        expect(index?).to be(false)
       end
 
       it "knows the readme should be the index" do
-        expect(should_be_index?).to eql(true)
+        expect(should_be_index?).to be(true)
       end
 
       it "builds the index page" do
@@ -52,7 +54,7 @@ describe JekyllReadmeIndex::Generator do
         expect(site.pages.map(&:url)).to include("/")
       end
 
-      context "building" do
+      context "when building" do
         before { site.process }
 
         it "writes the index" do
@@ -70,25 +72,25 @@ describe JekyllReadmeIndex::Generator do
       let(:fixture) { "readme-and-index" }
 
       it "knows there's a readme" do
-        expect(readme).to_not be_nil
+        expect(readme).not_to be_nil
         expect(readme.class).to eql(Jekyll::StaticFile)
         expect(readme.relative_path).to eql("/readme.markdown")
       end
 
       it "knows there's an index" do
-        expect(index?).to eql(true)
+        expect(index?).to be(true)
       end
 
       it "knows the readme shouldn't be the index" do
-        expect(should_be_index?).to eql(false)
+        expect(should_be_index?).to be(false)
       end
 
       it "doesn't overwrite the index" do
         subject.generate(site)
-        expect(site.pages.map(&:name)).to_not include("README.md")
+        expect(site.pages.map(&:name)).not_to include("README.md")
       end
 
-      context "building" do
+      context "when building" do
         before { site.process }
 
         it "writes the index" do
@@ -106,19 +108,19 @@ describe JekyllReadmeIndex::Generator do
       let(:fixture) { "readme-and-html-index" }
 
       it "knows there's an index" do
-        expect(index?).to eql(true)
+        expect(index?).to be(true)
       end
 
       it "knows the readme shouldn't be the index" do
-        expect(should_be_index?).to eql(false)
+        expect(should_be_index?).to be(false)
       end
 
       it "doesn't overwrite the index" do
         subject.generate(site)
-        expect(site.pages.map(&:name)).to_not include("README.md")
+        expect(site.pages.map(&:name)).not_to include("README.md")
       end
 
-      context "building" do
+      context "when building" do
         before { site.process }
 
         it "writes the index" do
@@ -136,19 +138,19 @@ describe JekyllReadmeIndex::Generator do
       let(:fixture) { "readme-and-html-page-index" }
 
       it "knows there's an index" do
-        expect(index?).to eql(true)
+        expect(index?).to be(true)
       end
 
       it "knows the readme shouldn't be the index" do
-        expect(should_be_index?).to eql(false)
+        expect(should_be_index?).to be(false)
       end
 
       it "doesn't overwrite the index" do
         subject.generate(site)
-        expect(site.pages.map(&:name)).to_not include("README.md")
+        expect(site.pages.map(&:name)).not_to include("README.md")
       end
 
-      context "building" do
+      context "when building" do
         before { site.process }
 
         it "writes the index" do
@@ -166,19 +168,19 @@ describe JekyllReadmeIndex::Generator do
       let(:fixture) { "readme-and-index-permalink" }
 
       it "knows there's an index" do
-        expect(index?).to eql(true)
+        expect(index?).to be(true)
       end
 
       it "knows the readme shouldn't be the index" do
-        expect(should_be_index?).to eql(false)
+        expect(should_be_index?).to be(false)
       end
 
       it "doesn't overwrite the index" do
         subject.generate(site)
-        expect(site.pages.map(&:name)).to_not include("README.md")
+        expect(site.pages.map(&:name)).not_to include("README.md")
       end
 
-      context "building" do
+      context "when building" do
         before { site.process }
 
         it "writes the index" do
@@ -200,18 +202,18 @@ describe JekyllReadmeIndex::Generator do
       end
 
       it "doesn't err out on should_be_index?" do
-        expect(should_be_index?).to eql(false)
+        expect(should_be_index?).to be(false)
       end
 
       it "knows there's an index" do
-        expect(index?).to eql(false)
+        expect(index?).to be(false)
       end
 
-      context "building" do
+      context "when building" do
         before { site.process }
 
         it "doesn't write an index" do
-          expect(index_path).to_not be_an_existing_file
+          expect(index_path).not_to be_an_existing_file
         end
       end
     end
@@ -224,14 +226,14 @@ describe JekyllReadmeIndex::Generator do
       end
 
       it "knows there's an index" do
-        expect(index?).to eql(true)
+        expect(index?).to be(true)
       end
 
       it "doesn't err out on should_be_index?" do
-        expect(should_be_index?).to eql(false)
+        expect(should_be_index?).to be(false)
       end
 
-      context "building" do
+      context "when building" do
         before { site.process }
 
         it "writes the index" do
@@ -249,20 +251,21 @@ describe JekyllReadmeIndex::Generator do
       let(:fixture) { "xml-index" }
 
       it "knows there's an index" do
-        expect(index?).to eql(true)
+        expect(index?).to be(true)
       end
 
       it "knows the readme shouldn't be the index" do
-        expect(should_be_index?).to eql(false)
+        expect(should_be_index?).to be(false)
       end
 
       it "doesn't overwrite the index" do
         subject.generate(site)
-        expect(site.pages.map(&:name)).to_not include("README.md")
+        expect(site.pages.map(&:name)).not_to include("README.md")
       end
 
-      context "building" do
+      context "when building" do
         before { site.process }
+
         let(:index_name) { "index.xml" }
 
         it "writes the index" do
@@ -280,20 +283,21 @@ describe JekyllReadmeIndex::Generator do
       let(:fixture) { "xhtml-index" }
 
       it "knows there's an index" do
-        expect(index?).to eql(true)
+        expect(index?).to be(true)
       end
 
       it "knows the readme shouldn't be the index" do
-        expect(should_be_index?).to eql(false)
+        expect(should_be_index?).to be(false)
       end
 
       it "doesn't overwrite the index" do
         subject.generate(site)
-        expect(site.pages.map(&:name)).to_not include("README.md")
+        expect(site.pages.map(&:name)).not_to include("README.md")
       end
 
-      context "building" do
+      context "when building" do
         before { site.process }
+
         let(:index_name) { "index.xhtml" }
 
         it "writes the index" do
@@ -315,17 +319,17 @@ describe JekyllReadmeIndex::Generator do
       let(:dir) { "/" }
 
       it "knows there's a readme" do
-        expect(readme).to_not be_nil
+        expect(readme).not_to be_nil
         expect(readme.class).to eql(Jekyll::StaticFile)
         expect(readme.relative_path).to eql("/README.md")
       end
 
       it "knows there's no index" do
-        expect(index?).to eql(false)
+        expect(index?).to be(false)
       end
 
       it "knows the readme should be the index" do
-        expect(should_be_index?).to eql(true)
+        expect(should_be_index?).to be(true)
       end
 
       it "builds the index page" do
@@ -340,7 +344,7 @@ describe JekyllReadmeIndex::Generator do
         expect(site.pages.map(&:url)).to include("/")
       end
 
-      context "building" do
+      context "when building" do
         before { site.process }
 
         it "writes the index" do
@@ -358,17 +362,17 @@ describe JekyllReadmeIndex::Generator do
       let(:dir) { "/with_readme/" }
 
       it "knows there's a readme" do
-        expect(readme).to_not be_nil
+        expect(readme).not_to be_nil
         expect(readme.class).to eql(Jekyll::StaticFile)
         expect(readme.relative_path).to eql("#{dir}README.md")
       end
 
       it "knows there's no index" do
-        expect(index?).to eql(false)
+        expect(index?).to be(false)
       end
 
       it "knows the readme should be the index" do
-        expect(should_be_index?).to eql(true)
+        expect(should_be_index?).to be(true)
       end
 
       it "builds the index page" do
@@ -383,7 +387,7 @@ describe JekyllReadmeIndex::Generator do
         expect(site.pages.map(&:url)).to include(dir)
       end
 
-      context "building" do
+      context "when building" do
         before { site.process }
 
         it "writes the index" do
@@ -401,20 +405,20 @@ describe JekyllReadmeIndex::Generator do
       let(:dir) { "/with_readme_and_index/" }
 
       it "knows there's a readme" do
-        expect(readme).to_not be_nil
+        expect(readme).not_to be_nil
         expect(readme.class).to eql(Jekyll::StaticFile)
         expect(readme.relative_path).to eql("#{dir}README.md")
       end
 
       it "knows there's an index" do
-        expect(index?).to eql(true)
+        expect(index?).to be(true)
       end
 
       it "knows the readme shouldn't be the index" do
-        expect(should_be_index?).to eql(false)
+        expect(should_be_index?).to be(false)
       end
 
-      context "building" do
+      context "when building" do
         before { site.process }
 
         it "writes the index" do
@@ -436,14 +440,14 @@ describe JekyllReadmeIndex::Generator do
       end
 
       it "knows the readme shouldn't be the index" do
-        expect(should_be_index?).to eql(false)
+        expect(should_be_index?).to be(false)
       end
 
-      context "building" do
+      context "when building" do
         before { site.process }
 
         it "doesn't write the index" do
-          expect(index_path).to_not be_an_existing_file
+          expect(index_path).not_to be_an_existing_file
         end
       end
     end
@@ -456,7 +460,7 @@ describe JekyllReadmeIndex::Generator do
       let(:fixture) { "readme-with-frontmatter" }
 
       it "knows there's a readme" do
-        expect(readme_with_frontmatter).to_not be_nil
+        expect(readme_with_frontmatter).not_to be_nil
         expect(readme_with_frontmatter.class).to eql(Jekyll::Page)
         expect(readme_with_frontmatter.path).to eql("README.md")
       end
@@ -484,7 +488,7 @@ describe JekyllReadmeIndex::Generator do
 
         it "removes the readme file" do
           subject.generate(site)
-          expect(site.static_files.map(&:relative_path)).to_not include("/README.md")
+          expect(site.static_files.map(&:relative_path)).not_to include("/README.md")
         end
       end
 
@@ -493,7 +497,7 @@ describe JekyllReadmeIndex::Generator do
 
         it "doesn't overwrite the index" do
           subject.generate(site)
-          expect(site.pages.map(&:name)).to_not include("readme.markdown")
+          expect(site.pages.map(&:name)).not_to include("readme.markdown")
         end
 
         it "doesn't remove the readme file" do
@@ -507,7 +511,7 @@ describe JekyllReadmeIndex::Generator do
 
         it "doesn't overwrite the index" do
           subject.generate(site)
-          expect(site.pages.map(&:name)).to_not include("readme.markdown")
+          expect(site.pages.map(&:name)).not_to include("readme.markdown")
         end
 
         it "doesn't remove the readme file" do
@@ -521,7 +525,7 @@ describe JekyllReadmeIndex::Generator do
 
         it "doesn't overwrite the index" do
           subject.generate(site)
-          expect(site.pages.map(&:name)).to_not include("readme.markdown")
+          expect(site.pages.map(&:name)).not_to include("readme.markdown")
         end
 
         it "doesn't remove the readme file" do
@@ -535,7 +539,7 @@ describe JekyllReadmeIndex::Generator do
 
         it "doesn't overwrite the index" do
           subject.generate(site)
-          expect(site.pages.map(&:name)).to_not include("readme.markdown")
+          expect(site.pages.map(&:name)).not_to include("readme.markdown")
         end
 
         it "doesn't remove the readme file" do
@@ -560,7 +564,7 @@ describe JekyllReadmeIndex::Generator do
         it "does remove the root readme file" do
           subject.generate(site)
           readme = "/readme.markdown"
-          expect(site.static_files.map(&:relative_path)).to_not include(readme)
+          expect(site.static_files.map(&:relative_path)).not_to include(readme)
         end
       end
 
@@ -576,7 +580,7 @@ describe JekyllReadmeIndex::Generator do
         it "does remove the subfolder readme file" do
           subject.generate(site)
           readme = "/with_readme/readme.markdown"
-          expect(site.static_files.map(&:relative_path)).to_not include(readme)
+          expect(site.static_files.map(&:relative_path)).not_to include(readme)
         end
       end
     end
@@ -588,8 +592,8 @@ describe JekyllReadmeIndex::Generator do
 
     it "doesn't create the index page" do
       subject.generate(site)
-      expect(site.pages.map(&:name)).to_not include("README.md")
-      expect(site.pages.map(&:url)).to_not include("/")
+      expect(site.pages.map(&:name)).not_to include("README.md")
+      expect(site.pages.map(&:url)).not_to include("/")
     end
   end
 

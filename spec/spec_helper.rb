@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "jekyll-readme-index"
 
 RSpec.configure do |config|
@@ -12,9 +14,7 @@ RSpec.configure do |config|
   config.shared_context_metadata_behavior = :apply_to_host_groups
   config.example_status_persistence_file_path = "spec/examples.txt"
 
-  if config.files_to_run.one?
-    config.default_formatter = "doc"
-  end
+  config.default_formatter = "doc" if config.files_to_run.one?
 
   config.order = :random
   Kernel.srand config.seed

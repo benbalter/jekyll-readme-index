@@ -2,17 +2,17 @@
 
 module JekyllReadmeIndex
   class Generator < Jekyll::Generator
-    INDEX_REGEX = %r!$|index\.(html?|xhtml|xml)$!i
+    INDEX_REGEX = %r!$|index\.(html?|xhtml|xml)$!i.freeze
 
     attr_accessor :site
 
     safe true
     priority :low
 
-    CONFIG_KEY = "readme_index".freeze
-    ENABLED_KEY = "enabled".freeze
-    CLEANUP_KEY = "remove_originals".freeze
-    FRONTMATTER_KEY = "with_frontmatter".freeze
+    CONFIG_KEY = "readme_index"
+    ENABLED_KEY = "enabled"
+    CLEANUP_KEY = "remove_originals"
+    FRONTMATTER_KEY = "with_frontmatter"
 
     def initialize(site)
       @site = site
@@ -24,6 +24,7 @@ module JekyllReadmeIndex
 
       readmes.each do |readme|
         next unless should_be_index?(readme)
+
         site.pages << readme.to_page
         site.static_files.delete(readme) if cleanup?
       end
@@ -31,6 +32,7 @@ module JekyllReadmeIndex
       if with_frontmatter?
         readmes_with_frontmatter.each do |readme|
           next unless should_be_index?(readme)
+
           readme.update_permalink
         end
       end
@@ -50,6 +52,7 @@ module JekyllReadmeIndex
     # Should the given readme be the containing directory's index?
     def should_be_index?(readme)
       return false unless readme
+
       !dir_has_index? File.dirname(readme.url)
     end
 
