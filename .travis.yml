@@ -1,5 +1,4 @@
-rvm:
-  - 2.2
+rvm: 2.5
 before_install: gem install bundler
 language: ruby
 script: script/cibuild
