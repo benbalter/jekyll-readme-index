@@ -3,3 +3,4 @@ _site
 *.gem
 Gemfile.lock
 .ruby*
+spec/fixtures/**/.jekyll-cache
