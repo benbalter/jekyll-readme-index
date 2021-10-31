@@ -1,6 +1,0 @@
-spec/examples.txt
-_site
-*.gem
-Gemfile.lock
-.ruby*
-spec/fixtures/**/.jekyll-cache
