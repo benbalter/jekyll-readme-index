@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -e
-
-bundle exec rspec
-bundle exec rubocop -S -D
-bundle exec gem build jekyll-readme-index.gemspec
