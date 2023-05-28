@@ -35,6 +35,7 @@ readme_index:
   enabled:          true
   remove_originals: false
   with_frontmatter: false
+  regex:            null
 ```
 
 ### Removing originals
