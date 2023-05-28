@@ -310,6 +310,46 @@ describe JekyllReadmeIndex::Generator do
         end
       end
     end
+
+    context "with a readme and an override" do
+      let(:fixture) { "readme-and-override" }
+      let(:overrides) { { "readme_index" => { "regex" => "\/.github\/README.md" } } }
+
+      it "knows there's a readme" do
+        expect(readme).not_to be_nil
+        expect(readme.class).to eql(Jekyll::StaticFile)
+        expect(readme.relative_path).to eql("/.github/README.md")
+      end
+
+      it "knows the readme should be the index" do
+        expect(should_be_index?).to be(true)
+      end
+
+      it "builds the index page" do
+        expect(page.class).to eql(Jekyll::Page)
+        expect(page.content).to eql("# Jekyll Readme Index Override\n")
+        expect(page.url).to eql("/")
+      end
+
+      it "creates the index page" do
+        subject.generate(site)
+        expect(site.pages.map(&:name)).to include("README.md")
+        expect(site.pages.map(&:url)).to include("/")
+      end
+
+      context "when building" do
+        before { site.process }
+
+        it "writes the index" do
+          expect(index_path).to be_an_existing_file
+        end
+
+        it "renders the markdown to HTML" do
+          expected = "<h1 id=\"jekyll-readme-index\">Jekyll Readme Index Override</h1>\n"
+          expect(index_content).to eql(expected)
+        end
+      end
+    end
   end
 
   context "with multiple readmes" do

@@ -13,6 +13,7 @@ module JekyllReadmeIndex
     ENABLED_KEY = "enabled"
     CLEANUP_KEY = "remove_originals"
     FRONTMATTER_KEY = "with_frontmatter"
+    REGEX_KEY = "regex"
 
     def initialize(site)
       @site = site
@@ -67,7 +68,12 @@ module JekyllReadmeIndex
 
     # Regexp to match a file path against to detect if the given file is a README
     def readme_regex
-      @readme_regex ||= %r!/readme(#{Regexp.union(markdown_converter.extname_list)})$!i
+      regex = option(REGEX_KEY)
+      if regex
+        @readme_regex ||= Regexp.new(regex)
+      else
+        @readme_regex ||= %r!/readme(#{Regexp.union(markdown_converter.extname_list)})$!i
+      end
     end
 
     def markdown_converter
