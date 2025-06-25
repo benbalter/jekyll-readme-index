@@ -472,6 +472,19 @@ describe JekyllReadmeIndex::Generator do
       end
     end
 
+    context "with nested README without frontmatter (normal mode)" do
+      let(:fixture) { "nested-readme-without-frontmatter" }
+      let(:overrides) { { "readme_index" => { "with_frontmatter" => false } } }
+      let(:dir) { "/a/b/" }
+
+      it "creates the index page in the correct directory in normal mode" do
+        subject.generate(site)
+        readme_page = site.pages.find { |p| p.name == "README.md" }
+        expect(readme_page).not_to be_nil
+        expect(readme_page.url).to eql("/a/b/")
+      end
+    end
+
     context "with nested README without frontmatter but with_frontmatter enabled" do
       let(:fixture) { "nested-readme-without-frontmatter" }
       let(:dir) { "/a/b/" }
@@ -479,25 +492,12 @@ describe JekyllReadmeIndex::Generator do
       it "knows there's a readme as static file" do
         nested_static_readme = readmes.find { |r| r.relative_path =~ %r!/a/b/README\.md$!i }
         expect(nested_static_readme).not_to be_nil
-        puts "DEBUG: Static readme relative_path = #{nested_static_readme.relative_path}"
-        puts "DEBUG: Static readme url = #{nested_static_readme.url}"
       end
 
       it "creates the index page in the correct directory for static file" do
         subject.generate(site)
-        # Debug: let's see what pages were created
-        puts "DEBUG: All pages after generate:"
-        site.pages.each { |p| puts "  - #{p.name} at #{p.dir} (url: #{p.url})" }
-        
-        # Should find a page created from the static file
-        readme_page = site.pages.find { |p| p.name == "README.md" && p.dir == "/a/b/" }
-        if readme_page.nil?
-          # Let's try to find it by other criteria
-          readme_page = site.pages.find { |p| p.name == "README.md" }
-          puts "DEBUG: Found README page at different location: #{readme_page&.dir} (url: #{readme_page&.url})" if readme_page
-        end
+        readme_page = site.pages.find { |p| p.name == "README.md" }
         expect(readme_page).not_to be_nil
-        puts "DEBUG: Page URL for static file = #{readme_page.url}"
         expect(readme_page.url).to eql("/a/b/")
       end
     end
@@ -515,26 +515,25 @@ describe JekyllReadmeIndex::Generator do
       it "correctly detects that readme should be index" do
         nested_readme = readmes_with_frontmatter.find { |r| r.path == "a/b/README.md" }
         expect(nested_readme).not_to be_nil
-        puts "DEBUG: nested_readme.url = #{nested_readme.url}"
-        puts "DEBUG: File.dirname(nested_readme.url) = #{File.dirname(nested_readme.url)}"
-        puts "DEBUG: File.dirname(nested_readme.url).frozen? = #{File.dirname(nested_readme.url).frozen?}"
-        # Test this separately first
-        dir_path = File.dirname(nested_readme.url)
-        puts "DEBUG: calling dir_has_index? with '#{dir_path}'"
         expect(subject.send(:should_be_index?, nested_readme)).to be(true)
       end
 
       it "creates the index page in the correct directory" do
-        readme_page_before = site.pages.find { |p| p.name == "README.md" && p.path == "a/b/README.md" }
-        puts "DEBUG: Page URL before generate = #{readme_page_before&.url}"
-        
         subject.generate(site)
-        expect(site.pages.map(&:name)).to include("README.md")
-        # The README should create an index in its own directory (/a/b/), not parent (/a/)
         readme_page = site.pages.find { |p| p.name == "README.md" && p.path == "a/b/README.md" }
         expect(readme_page).not_to be_nil
-        puts "DEBUG: Page URL after generate = #{readme_page.url}"
-        puts "DEBUG: Page URL expected = /a/b/"
+        expect(readme_page.url).to eql("/a/b/")
+      end
+
+      it "also works for pages with different initial URLs" do
+        # Test that update_permalink works correctly for pages with file URLs too
+        subject.generate(site)
+        readme_page = site.pages.find { |p| p.name == "README.md" && p.path == "a/b/README.md" }
+        
+        # Manually set the URL to a file URL and call update_permalink again
+        readme_page.instance_variable_set(:@url, "/a/b/README.html")
+        readme_page.update_permalink
+        
         expect(readme_page.url).to eql("/a/b/")
       end
     end

@@ -12,7 +12,11 @@ module Jekyll
 
   class Page
     def update_permalink
-      data["permalink"] = File.dirname(url) + "/"
+      # If URL already ends with '/', it's a directory URL and should be used as-is
+      # Otherwise, extract the directory from the file URL
+      target_dir = url.end_with?('/') ? url : File.dirname(url) + "/"
+      
+      data["permalink"] = target_dir
       @url = URL.new(
         :template     => template,
         :placeholders => url_placeholders,
