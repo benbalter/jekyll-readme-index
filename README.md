@@ -2,7 +2,7 @@
 
 A Jekyll plugin to render a project's README as the site's index.
 
-[![Build Status](https://travis-ci.org/benbalter/jekyll-readme-index.svg?branch=master)](https://travis-ci.org/benbalter/jekyll-readme-index)
+[![CI](https://github.com/benbalter/jekyll-readme-index/actions/workflows/ci.yml/badge.svg)](https://github.com/benbalter/jekyll-readme-index/actions/workflows/ci.yml)
 
 ## What it does
 
