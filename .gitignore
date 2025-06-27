@@ -4,5 +4,5 @@ _site
 Gemfile.lock
 .ruby*
 spec/fixtures/**/.jekyll-cache
-vendor/bundle/
+vendor/
 .bundle/
