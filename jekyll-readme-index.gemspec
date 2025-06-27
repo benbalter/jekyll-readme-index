@@ -17,10 +17,10 @@ Gem::Specification.new do |s|
   s.license       = "MIT"
 
   s.add_runtime_dependency "jekyll", ">= 3.0", "< 5.0"
-  s.add_runtime_dependency "kramdown-parser-gfm"
-  s.add_development_dependency "rspec", "~> 3.5"
-  s.add_development_dependency "rubocop"
-  s.add_development_dependency "rubocop-jekyll"
-  s.add_development_dependency "rubocop-performance"
-  s.add_development_dependency "rubocop-rspec"
+  s.add_runtime_dependency "kramdown-parser-gfm", "~> 1.1"
+  s.add_development_dependency "rspec", "~> 3.13"
+  s.add_development_dependency "rubocop", "~> 1.57"
+  s.add_development_dependency "rubocop-jekyll", "~> 0.14"
+  s.add_development_dependency "rubocop-performance", "~> 1.23"
+  s.add_development_dependency "rubocop-rspec", "~> 3.0"
 end
