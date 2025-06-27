@@ -529,11 +529,11 @@ describe JekyllReadmeIndex::Generator do
         # Test that update_permalink works correctly for pages with file URLs too
         subject.generate(site)
         readme_page = site.pages.find { |p| p.name == "README.md" && p.path == "a/b/README.md" }
-        
+
         # Manually set the URL to a file URL and call update_permalink again
         readme_page.instance_variable_set(:@url, "/a/b/README.html")
         readme_page.update_permalink
-        
+
         expect(readme_page.url).to eql("/a/b/")
       end
     end
