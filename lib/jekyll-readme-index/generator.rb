@@ -13,6 +13,7 @@ module JekyllReadmeIndex
     ENABLED_KEY = "enabled"
     CLEANUP_KEY = "remove_originals"
     FRONTMATTER_KEY = "with_frontmatter"
+    PATTERN_KEY = "readme_pattern"
 
     def initialize(site)
       @site = site
@@ -42,11 +43,45 @@ module JekyllReadmeIndex
 
     # Returns an array of all READMEs as StaticFiles
     def readmes
-      site.static_files.select { |file| file.relative_path =~ readme_regex }
+      candidates = site.static_files.select { |file| file.relative_path =~ readme_regex }
+      prioritize_readmes(candidates)
     end
 
     def readmes_with_frontmatter
-      site.pages.select { |file| ("/" + file.path) =~ readme_regex }
+      candidates = site.pages.select { |file| ("/" + file.path) =~ readme_regex }
+      prioritize_readmes(candidates)
+    end
+
+    # Prioritize READMEs according to GitHub's order: .github > root > docs
+    # For each target directory, keep only the highest priority README
+    def prioritize_readmes(candidates)
+      grouped = candidates.group_by do |file|
+        # Get the directory that would become the index
+        # READMEs in .github and docs should serve as index for parent directory
+        path = file.respond_to?(:relative_path) ? file.relative_path : "/" + file.path
+        dir = File.dirname(file.respond_to?(:url) ? file.url : "/" + file.path)
+        
+        # If the README is in .github or docs subdirectory at root, 
+        # it should be the index for root
+        if dir == "/.github" || dir == "/docs"
+          "/"
+        else
+          dir
+        end
+      end
+
+      grouped.flat_map do |_dir, files|
+        # Sort by priority: .github first, then root, then docs, then others
+        files.sort_by do |file|
+          path = file.respond_to?(:relative_path) ? file.relative_path : "/" + file.path
+          case path
+          when %r{^/\.github/readme}i then 0
+          when %r{^/readme}i then 1
+          when %r{^/docs/readme}i then 2
+          else 3
+          end
+        end.first
+      end.compact
     end
 
     # Should the given readme be the containing directory's index?
@@ -67,7 +102,16 @@ module JekyllReadmeIndex
 
     # Regexp to match a file path against to detect if the given file is a README
     def readme_regex
-      @readme_regex ||= %r!/readme(#{Regexp.union(markdown_converter.extname_list)})$!i
+      @readme_regex ||= begin
+        # Allow custom pattern override via configuration
+        if custom_pattern = option(PATTERN_KEY)
+          Regexp.new(custom_pattern, Regexp::IGNORECASE)
+        else
+          # Match README in any directory, including .github, docs subdirectories
+          extensions = Regexp.union(markdown_converter.extname_list)
+          %r!/(\.github/|docs/)?readme(#{extensions})$!i
+        end
+      end
     end
 
     def markdown_converter

@@ -5,7 +5,15 @@ module Jekyll
     # Convert this static file to a Page
     def to_page
       page = Jekyll::Page.new(@site, @base, @dir, @name)
-      page.data["permalink"] = File.dirname(url) + "/"
+      
+      # For READMEs in .github or docs at root level, they should be the root index
+      target_dir = if relative_path =~ %r!^/\.github/readme!i || relative_path =~ %r!^/docs/readme!i
+        "/"
+      else
+        File.dirname(url) + "/"
+      end
+      
+      page.data["permalink"] = target_dir
       page
     end
   end
