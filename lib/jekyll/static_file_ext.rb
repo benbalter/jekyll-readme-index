@@ -7,7 +7,7 @@ module Jekyll
       page = Jekyll::Page.new(@site, @base, @dir, @name)
 
       # For READMEs in .github or docs at root level, they should be the root index
-      target_dir = if relative_path =~ %r!^/\.github/readme!i || relative_path =~ %r!^/docs/readme!i
+      target_dir = if special_readme?
                      "/"
                    else
                      File.dirname(url) + "/"
@@ -15,6 +15,13 @@ module Jekyll
 
       page.data["permalink"] = target_dir
       page
+    end
+
+    private
+
+    # Check if this is a README in a special directory (.github or docs)
+    def special_readme?
+      relative_path =~ %r!^/(\.github|docs)/readme!i
     end
   end
 

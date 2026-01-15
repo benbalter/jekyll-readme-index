@@ -3,6 +3,9 @@
 module JekyllReadmeIndex
   class Generator < Jekyll::Generator
     INDEX_REGEX = %r!$|index\.(html?|xhtml|xml)$!i.freeze
+    GITHUB_DIR = "/.github"
+    DOCS_DIR = "/docs"
+    SPECIAL_DIRS = [GITHUB_DIR, DOCS_DIR].freeze
 
     attr_accessor :site
 
@@ -56,17 +59,14 @@ module JekyllReadmeIndex
     # For each target directory, keep only the highest priority README
     # rubocop:disable Metrics/PerceivedComplexity
     def prioritize_readmes(candidates)
-      # Create a constant for the directories to avoid immutable array in loop
-      special_dirs = ["/.github", "/docs"].freeze
-
       grouped = candidates.group_by do |file|
         # Get the directory that would become the index
         # READMEs in .github and docs should serve as index for parent directory
-        dir = File.dirname(file.respond_to?(:url) ? file.url : "/" + file.path)
+        dir = File.dirname(file_path(file))
 
         # If the README is in .github or docs subdirectory at root,
         # it should be the index for root
-        if special_dirs.include?(dir)
+        if SPECIAL_DIRS.include?(dir)
           "/"
         else
           dir
@@ -134,6 +134,11 @@ module JekyllReadmeIndex
 
     def with_frontmatter?
       option(FRONTMATTER_KEY) == true
+    end
+
+    # Helper method to get the file path (URL or path) for a file object
+    def file_path(file)
+      file.respond_to?(:url) ? file.url : "/" + file.path
     end
   end
 end
