@@ -752,7 +752,9 @@ describe JekyllReadmeIndex::Generator do
     let(:fixture) { "priority-test" }
 
     it "finds all three READMEs" do
-      all_candidates = site.static_files.select { |file| file.relative_path =~ subject.send(:readme_regex) }
+      all_candidates = site.static_files.select do |file|
+        file.relative_path =~ subject.send(:readme_regex)
+      end
       expect(all_candidates.length).to eq(3)
     end
 
