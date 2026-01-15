@@ -673,4 +673,123 @@ describe JekyllReadmeIndex::Generator do
       expect(site.pages.map(&:url)).to include("/")
     end
   end
+
+  context "with .github/README.md" do
+    let(:fixture) { "github-readme-no-index" }
+
+    it "knows there's a readme in .github" do
+      expect(readmes).not_to be_empty
+      expect(readmes.first.relative_path).to eql("/.github/README.md")
+    end
+
+    it "knows there's no index" do
+      expect(index?).to be(false)
+    end
+
+    it "knows the .github readme should be the index" do
+      readme_file = readmes.first
+      expect(subject.send(:should_be_index?, readme_file)).to be(true)
+    end
+
+    it "creates the index page from .github/README.md" do
+      subject.generate(site)
+      expect(site.pages.map(&:name)).to include("README.md")
+      expect(site.pages.map(&:url)).to include("/")
+    end
+
+    context "when building" do
+      before { site.process }
+
+      it "writes the index" do
+        expect(index_path).to be_an_existing_file
+      end
+
+      it "renders the .github readme as HTML" do
+        expected = "<h1 id=\"github-directory-readme\">GitHub Directory Readme</h1>\n"
+        expect(index_content).to eql(expected)
+      end
+    end
+  end
+
+  context "with docs/README.md" do
+    let(:fixture) { "docs-readme-no-index" }
+
+    it "knows there's a readme in docs" do
+      expect(readmes).not_to be_empty
+      expect(readmes.first.relative_path).to eql("/docs/README.md")
+    end
+
+    it "knows there's no index" do
+      expect(index?).to be(false)
+    end
+
+    it "knows the docs readme should be the index" do
+      readme_file = readmes.first
+      expect(subject.send(:should_be_index?, readme_file)).to be(true)
+    end
+
+    it "creates the index page from docs/README.md" do
+      subject.generate(site)
+      expect(site.pages.map(&:name)).to include("README.md")
+      expect(site.pages.map(&:url)).to include("/")
+    end
+
+    context "when building" do
+      before { site.process }
+
+      it "writes the index" do
+        expect(index_path).to be_an_existing_file
+      end
+
+      it "renders the docs readme as HTML" do
+        expected = "<h1 id=\"docs-directory-readme\">Docs Directory Readme</h1>\n"
+        expect(index_content).to eql(expected)
+      end
+    end
+  end
+
+  context "with priority order (.github > root > docs)" do
+    let(:fixture) { "priority-test" }
+
+    it "finds all three READMEs" do
+      all_candidates = site.static_files.select do |file|
+        file.relative_path =~ subject.send(:readme_regex)
+      end
+      expect(all_candidates.length).to eq(3)
+    end
+
+    it "prioritizes .github/README.md over others" do
+      readme_file = readmes.first
+      expect(readme_file.relative_path).to eql("/.github/README.md")
+    end
+
+    it "creates the index page from .github/README.md" do
+      subject.generate(site)
+      expect(site.pages.map(&:name)).to include("README.md")
+      expect(site.pages.map(&:url)).to include("/")
+    end
+
+    context "when building" do
+      before { site.process }
+
+      it "writes the index from .github README" do
+        expect(index_path).to be_an_existing_file
+      end
+
+      it "renders the .github readme, not root or docs" do
+        expected = "<h1 id=\"github-readme-priority-1\">GitHub README (Priority 1)</h1>\n"
+        expect(index_content).to eql(expected)
+      end
+    end
+  end
+
+  context "with custom readme_pattern" do
+    let(:fixture) { "readme-no-index" }
+    let(:overrides) { { "readme_index" => { "readme_pattern" => "/custom-readme\\.md$" } } }
+
+    it "doesn't match standard README.md with custom pattern" do
+      # The custom pattern looks for custom-readme.md, so README.md won't match
+      expect(readmes).to be_empty
+    end
+  end
 end

@@ -35,7 +35,36 @@ readme_index:
   enabled:          true
   remove_originals: false
   with_frontmatter: false
+  readme_pattern:   nil
 ```
+
+### GitHub-style README locations
+
+Following [GitHub's README conventions](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes), this plugin supports READMEs in multiple locations:
+
+- `.github/README.md` - Hidden in the `.github` directory
+- `README.md` - Root directory (traditional location)
+- `docs/README.md` - In the `docs` directory
+
+If multiple READMEs exist, they are prioritized in the order above (matching GitHub's behavior). For example, if both `.github/README.md` and `README.md` exist, the `.github/README.md` will be used as the site index.
+
+**Note:** To use `.github/README.md`, you must add `.github` to your Jekyll `include` configuration:
+
+```yml
+include:
+  - .github
+```
+
+### Custom README pattern
+
+You can override the default README detection pattern by setting the `readme_pattern` configuration option:
+
+```yml
+readme_index:
+  readme_pattern: "/custom-readme\\.md$"
+```
+
+This allows you to use a different filename or pattern for your README files. The pattern is treated as a case-insensitive regular expression.
 
 ### Removing originals
 
