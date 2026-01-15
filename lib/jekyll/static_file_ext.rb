@@ -21,7 +21,8 @@ module Jekyll
 
     # Check if this is a README in a special directory (.github or docs)
     def special_readme?
-      relative_path =~ %r!^/(\.github|docs)/readme!i
+      relative_path =~ JekyllReadmeIndex::Generator::GITHUB_README_PATTERN ||
+        relative_path =~ JekyllReadmeIndex::Generator::DOCS_README_PATTERN
     end
   end
 

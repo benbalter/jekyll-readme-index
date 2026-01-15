@@ -6,6 +6,9 @@ module JekyllReadmeIndex
     GITHUB_DIR = "/.github"
     DOCS_DIR = "/docs"
     SPECIAL_DIRS = [GITHUB_DIR, DOCS_DIR].freeze
+    GITHUB_README_PATTERN = %r!^/\.github/readme!i.freeze
+    DOCS_README_PATTERN = %r!^/docs/readme!i.freeze
+    ROOT_README_PATTERN = %r!^/readme!i.freeze
 
     attr_accessor :site
 
@@ -62,6 +65,7 @@ module JekyllReadmeIndex
       grouped = candidates.group_by do |file|
         # Get the directory that would become the index
         # READMEs in .github and docs should serve as index for parent directory
+        # Note: file_path returns Jekyll-normalized paths without query strings
         dir = File.dirname(file_path(file))
 
         # If the README is in .github or docs subdirectory at root,
@@ -78,9 +82,9 @@ module JekyllReadmeIndex
         files.min_by do |file|
           path = file.respond_to?(:relative_path) ? file.relative_path : "/" + file.path
           case path
-          when %r!^/\.github/readme!i then 0
-          when %r!^/readme!i then 1
-          when %r!^/docs/readme!i then 2
+          when GITHUB_README_PATTERN then 0
+          when ROOT_README_PATTERN then 1
+          when DOCS_README_PATTERN then 2
           else 3
           end
         end
@@ -111,8 +115,9 @@ module JekyllReadmeIndex
                           Regexp.new(custom_pattern, Regexp::IGNORECASE)
                         else
                           # Match README in any directory, including .github, docs subdirectories
+                          # The pattern ensures .github and docs are only matched at path boundaries
                           extensions = Regexp.union(markdown_converter.extname_list)
-                          %r!/(\.github/|docs/)?readme(#{extensions})$!i
+                          %r!/(?:\.github/|docs/)?readme(#{extensions})$!i
                         end
     end
 
