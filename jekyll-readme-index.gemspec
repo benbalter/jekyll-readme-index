@@ -17,9 +17,17 @@ Gem::Specification.new do |s|
   s.license       = "MIT"
 
   s.add_runtime_dependency "jekyll", ">= 3.0", "< 5.0"
-  s.add_development_dependency "rspec", "~> 3.5"
-  s.add_development_dependency "rubocop", "~> 0.40"
-  s.add_development_dependency "rubocop-jekyll", "~> 0.10.0"
-  s.add_development_dependency "rubocop-performance", "~> 1.5"
-  s.add_development_dependency "rubocop-rspec", "~> 1.3"
+  s.add_runtime_dependency "kramdown-parser-gfm", "~> 1.1"
+  s.add_development_dependency "rspec", "~> 3.13"
+  s.add_development_dependency "rubocop", "~> 1.57"
+  s.add_development_dependency "rubocop-jekyll", "~> 0.14"
+  s.add_development_dependency "rubocop-performance", "~> 1.23"
+  s.add_development_dependency "rubocop-rspec", "~> 3.0"
+  # No longer default gems as of recent Rubies; required transitively by
+  # RuboCop and Jekyll's dependencies (e.g. safe_yaml needs base64 on Ruby
+  # 3.4+, RuboCop needs benchmark/ostruct on Ruby 4.0).
+  s.add_development_dependency "base64"
+  s.add_development_dependency "benchmark"
+  s.add_development_dependency "ostruct"
+  s.add_development_dependency "tsort"
 end
