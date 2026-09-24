@@ -48,6 +48,10 @@ describe JekyllReadmeIndex::Generator do
         expect(page.url).to eql("/")
       end
 
+      it "sets the permalink without a double slash" do
+        expect(page.data["permalink"]).to eql("/")
+      end
+
       it "creates the index page" do
         subject.generate(site)
         expect(site.pages.map(&:name)).to include("README.md")
@@ -469,6 +473,12 @@ describe JekyllReadmeIndex::Generator do
         subject.generate(site)
         expect(site.pages.map(&:name)).to include("README.md")
         expect(site.pages.map(&:url)).to include("/")
+      end
+
+      it "sets the permalink without a double slash" do
+        subject.generate(site)
+        readme_page = site.pages.find { |p| p.name == "README.md" }
+        expect(readme_page.data["permalink"]).to eql("/")
       end
     end
 
