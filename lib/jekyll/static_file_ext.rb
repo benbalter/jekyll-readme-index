@@ -10,7 +10,7 @@ module Jekyll
       target_dir = if special_readme?
                      "/"
                    else
-                     File.dirname(url) + "/"
+                     File.join(File.dirname(url), "/")
                    end
 
       page.data["permalink"] = target_dir
@@ -30,7 +30,7 @@ module Jekyll
     def update_permalink
       # If URL already ends with '/', it's a directory URL and should be used as-is
       # Otherwise, extract the directory from the file URL
-      target_dir = url.end_with?("/") ? url : File.dirname(url) + "/"
+      target_dir = url.end_with?("/") ? url : File.join(File.dirname(url), "/")
 
       data["permalink"] = target_dir
       @url = URL.new(
