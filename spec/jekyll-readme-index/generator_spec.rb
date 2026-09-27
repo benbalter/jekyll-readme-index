@@ -831,6 +831,26 @@ describe JekyllReadmeIndex::Generator do
     end
   end
 
+  context "detecting indexes" do
+    let(:fixture) { "readme-and-nested-readme" }
+
+    it "matches directories and index files case-insensitively" do
+      expect(subject.send(:dir_has_index?, "/with_readme_and_index")).to be(true)
+      expect(subject.send(:dir_has_index?, "/WITH_README_AND_INDEX/")).to be(true)
+      expect(subject.send(:dir_has_index?, "/with_readme")).to be(false)
+    end
+
+    it "sees indexes added during generation" do
+      subject.send(:add_index_dir, "/with_readme/Index.XHTML")
+      expect(subject.send(:dir_has_index?, "/with_readme")).to be(true)
+    end
+
+    it "doesn't treat other files as indexes" do
+      subject.send(:add_index_dir, "/without_readme/other.html")
+      expect(subject.send(:dir_has_index?, "/without_readme")).to be(false)
+    end
+  end
+
   context "with custom readme_pattern" do
     let(:fixture) { "readme-no-index" }
     let(:overrides) { { "readme_index" => { "readme_pattern" => "/custom-readme\\.md$" } } }

@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+require "set"
+
 module JekyllReadmeIndex
   class Generator < Jekyll::Generator
-    INDEX_REGEX = %r!$|index\.(html?|xhtml|xml)$!i.freeze
+    # Captures the directory a URL is the index of, e.g. "/a/" for "/a/" or "/a/index.html"
+    INDEX_URL_REGEX = %r!\A(.*/)(?:index\.(?:html?|xhtml|xml))?\z!i.freeze
     GITHUB_DIR = "/.github"
     DOCS_DIR = "/docs"
     SPECIAL_DIRS = [GITHUB_DIR, DOCS_DIR].freeze
@@ -27,12 +30,15 @@ module JekyllReadmeIndex
 
     def generate(site)
       @site = site
+      @index_dirs = nil
       return if disabled?
 
       readmes.each do |readme|
         next unless should_be_index?(readme)
 
-        site.pages << to_page(readme)
+        page = to_page(readme)
+        site.pages << page
+        add_index_dir(page.url)
         site.static_files.delete(readme) if cleanup?
       end
 
@@ -40,7 +46,7 @@ module JekyllReadmeIndex
         readmes_with_frontmatter.each do |readme|
           next unless should_be_index?(readme)
 
-          update_permalink(readme)
+          add_index_dir(update_permalink(readme))
         end
       end
     end
@@ -147,9 +153,22 @@ module JekyllReadmeIndex
     #
     # relative_path - the directory path relative to the site root
     def dir_has_index?(relative_path)
-      relative_path << "/" unless relative_path.end_with? "/"
-      regex = %r!^#{Regexp.escape(relative_path)}#{INDEX_REGEX}!i
-      (site.pages + site.static_files).any? { |file| file.url =~ regex }
+      relative_path = File.join(relative_path, "/") unless relative_path.end_with?("/")
+      index_dirs.include?(relative_path.downcase)
+    end
+
+    # The (downcased) directories that already have an index page or file.
+    # Built once per generate instead of scanning every file for every README.
+    def index_dirs
+      @index_dirs ||= Set.new.tap do |dirs|
+        site.pages.each { |page| add_index_dir(page.url, dirs) }
+        site.static_files.each { |file| add_index_dir(file.url, dirs) }
+      end
+    end
+
+    def add_index_dir(url, dirs = index_dirs)
+      match = INDEX_URL_REGEX.match(url)
+      dirs << match[1].downcase if match
     end
 
     # Regexp to match a file path against to detect if the given file is a README
