@@ -60,7 +60,6 @@ module JekyllReadmeIndex
 
     # Prioritize READMEs according to GitHub's order: .github > root > docs
     # For each target directory, keep only the highest priority README
-    # rubocop:disable Metrics/PerceivedComplexity
     def prioritize_readmes(candidates)
       grouped = candidates.group_by do |file|
         # Get the directory that would become the index
@@ -80,8 +79,7 @@ module JekyllReadmeIndex
       grouped.flat_map do |_dir, files|
         # Sort by priority: .github first, then root, then docs, then others
         files.min_by do |file|
-          path = file.respond_to?(:relative_path) ? file.relative_path : "/" + file.path
-          case path
+          case readme_path(file)
           when GITHUB_README_PATTERN then 0
           when ROOT_README_PATTERN then 1
           when DOCS_README_PATTERN then 2
@@ -90,7 +88,6 @@ module JekyllReadmeIndex
         end
       end.compact
     end
-    # rubocop:enable Metrics/PerceivedComplexity
 
     # Convert a README StaticFile to a Page that serves as its directory's index
     def to_page(static_file)
@@ -101,38 +98,49 @@ module JekyllReadmeIndex
       name = static_file.instance_variable_get(:@name)
       page = Jekyll::Page.new(site, base, dir, name)
 
-      # For READMEs in .github or docs at root level, they should be the root index
-      target_dir = if special_readme?(static_file)
-                     "/"
-                   else
-                     File.join(File.dirname(static_file.url), "/")
-                   end
-
-      page.data["permalink"] = target_dir
+      page.data["permalink"] = target_dir(static_file)
       page
     end
 
     # Point a README Page's permalink at its directory
     def update_permalink(page)
       # If URL already ends with '/', it's a directory URL and should be used as-is
-      # Otherwise, extract the directory from the file URL
       url = page.url
-      page.data["permalink"] = url.end_with?("/") ? url : File.join(File.dirname(url), "/")
+      page.data["permalink"] = url.end_with?("/") ? url : target_dir(page)
       # Page#url is memoized; drop it so it's rebuilt from the new permalink
       page.instance_variable_set(:@url, nil)
       page.url
     end
 
+    # The directory a README should be the index for
+    def target_dir(file)
+      # For READMEs in .github or docs at root level, they should be the root index
+      return "/" if special_readme?(file)
+
+      File.join(File.dirname(file.url), "/")
+    end
+
     # Check if this is a README in a special directory (.github or docs)
     def special_readme?(file)
-      file.relative_path =~ GITHUB_README_PATTERN || file.relative_path =~ DOCS_README_PATTERN
+      path = readme_path(file)
+      path =~ GITHUB_README_PATTERN || path =~ DOCS_README_PATTERN
+    end
+
+    # The file's path relative to the site source, with a leading slash.
+    #
+    # StaticFile#relative_path starts with "/", but Page#relative_path doesn't
+    # on Jekyll 4 (or for root pages on Jekyll 3), so the priority patterns
+    # never matched READMEs with front matter.
+    def readme_path(file)
+      path = file.relative_path
+      path.start_with?("/") ? path : "/#{path}"
     end
 
     # Should the given readme be the containing directory's index?
     def should_be_index?(readme)
       return false unless readme
 
-      !dir_has_index? File.dirname(readme.url)
+      !dir_has_index? target_dir(readme)
     end
 
     # Does the given directory have an index?

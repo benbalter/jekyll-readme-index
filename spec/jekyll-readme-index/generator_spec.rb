@@ -793,6 +793,44 @@ describe JekyllReadmeIndex::Generator do
     end
   end
 
+  context "with priority order for READMEs with front matter" do
+    let(:fixture) { "priority-test-with-frontmatter" }
+
+    it "prioritizes .github/README.md over others" do
+      expect(readmes_with_frontmatter.map(&:path)).to eql([".github/README.md"])
+    end
+
+    it "uses .github/README.md as the root index" do
+      subject.generate(site)
+      urls = site.pages.to_h { |p| [p.path, p.url] }
+      expect(urls[".github/README.md"]).to eql("/")
+      expect(urls["README.md"]).to eql("/README.html")
+      expect(urls["docs/README.md"]).to eql("/docs/README.html")
+    end
+
+    context "when building" do
+      before { site.process }
+
+      it "renders the .github readme, not root or docs" do
+        expected = "<h1 id=\"github-readme-priority-1\">GitHub README (Priority 1)</h1>\n"
+        expect(index_content).to eql(expected)
+      end
+    end
+  end
+
+  context "with .github/README.md and a root index" do
+    let(:fixture) { "github-readme-and-index" }
+
+    it "knows the .github readme shouldn't be the index" do
+      expect(subject.send(:should_be_index?, readmes.first)).to be(false)
+    end
+
+    it "doesn't create a second root index page" do
+      subject.generate(site)
+      expect(site.pages.map(&:name)).not_to include("README.md")
+    end
+  end
+
   context "with custom readme_pattern" do
     let(:fixture) { "readme-no-index" }
     let(:overrides) { { "readme_index" => { "readme_pattern" => "/custom-readme\\.md$" } } }
