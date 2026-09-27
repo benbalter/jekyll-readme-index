@@ -32,7 +32,7 @@ module JekyllReadmeIndex
       readmes.each do |readme|
         next unless should_be_index?(readme)
 
-        site.pages << readme.to_page
+        site.pages << to_page(readme)
         site.static_files.delete(readme) if cleanup?
       end
 
@@ -40,7 +40,7 @@ module JekyllReadmeIndex
         readmes_with_frontmatter.each do |readme|
           next unless should_be_index?(readme)
 
-          readme.update_permalink
+          update_permalink(readme)
         end
       end
     end
@@ -91,6 +91,42 @@ module JekyllReadmeIndex
       end.compact
     end
     # rubocop:enable Metrics/PerceivedComplexity
+
+    # Convert a README StaticFile to a Page that serves as its directory's index
+    def to_page(static_file)
+      # StaticFile doesn't expose its base, dir, or name (the last only since
+      # Jekyll 4), so read them the same way jekyll-optional-front-matter does.
+      base = static_file.instance_variable_get(:@base)
+      dir  = static_file.instance_variable_get(:@dir)
+      name = static_file.instance_variable_get(:@name)
+      page = Jekyll::Page.new(site, base, dir, name)
+
+      # For READMEs in .github or docs at root level, they should be the root index
+      target_dir = if special_readme?(static_file)
+                     "/"
+                   else
+                     File.join(File.dirname(static_file.url), "/")
+                   end
+
+      page.data["permalink"] = target_dir
+      page
+    end
+
+    # Point a README Page's permalink at its directory
+    def update_permalink(page)
+      # If URL already ends with '/', it's a directory URL and should be used as-is
+      # Otherwise, extract the directory from the file URL
+      url = page.url
+      page.data["permalink"] = url.end_with?("/") ? url : File.join(File.dirname(url), "/")
+      # Page#url is memoized; drop it so it's rebuilt from the new permalink
+      page.instance_variable_set(:@url, nil)
+      page.url
+    end
+
+    # Check if this is a README in a special directory (.github or docs)
+    def special_readme?(file)
+      file.relative_path =~ GITHUB_README_PATTERN || file.relative_path =~ DOCS_README_PATTERN
+    end
 
     # Should the given readme be the containing directory's index?
     def should_be_index?(readme)

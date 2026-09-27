@@ -13,7 +13,7 @@ describe JekyllReadmeIndex::Generator do
   let(:readme_with_frontmatter) do
     readmes_with_frontmatter.find { |r| r.url =~ %r!#{dir}README\..*!i }
   end
-  let(:page) { readme.to_page }
+  let(:page) { subject.send(:to_page, readme) }
   let(:should_be_index?) { subject.send(:should_be_index?, readme) }
   let(:index_name) { "index.html" }
   let(:index_path) { File.join(site.dest, dir, index_name) }
@@ -542,7 +542,7 @@ describe JekyllReadmeIndex::Generator do
 
         # Manually set the URL to a file URL and call update_permalink again
         readme_page.instance_variable_set(:@url, "/a/b/README.html")
-        readme_page.update_permalink
+        subject.send(:update_permalink, readme_page)
 
         expect(readme_page.url).to eql("/a/b/")
       end
