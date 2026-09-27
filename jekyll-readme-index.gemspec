@@ -17,7 +17,10 @@ Gem::Specification.new do |s|
   s.license       = "MIT"
 
   s.add_runtime_dependency "jekyll", ">= 3.0", "< 5.0"
-  s.add_runtime_dependency "kramdown-parser-gfm", "~> 1.1"
+  # Jekyll 3.10 with kramdown 2 needs this to render the GFM specs. The plugin
+  # itself doesn't parse Markdown, Jekyll 4 depends on it directly, and
+  # github-pages pins it.
+  s.add_development_dependency "kramdown-parser-gfm", "~> 1.1"
   s.add_development_dependency "rspec", "~> 3.13"
   s.add_development_dependency "rubocop", "~> 1.57"
   s.add_development_dependency "rubocop-jekyll", "~> 0.14"
