@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+require "set"
+
 module JekyllReadmeIndex
   class Generator < Jekyll::Generator
-    INDEX_REGEX = %r!$|index\.(html?|xhtml|xml)$!i.freeze
+    # Captures the directory a URL is the index of, e.g. "/a/" for "/a/" or "/a/index.html"
+    INDEX_URL_REGEX = %r!\A(.*/)(?:index\.(?:html?|xhtml|xml))?\z!i.freeze
     GITHUB_DIR = "/.github"
     DOCS_DIR = "/docs"
     SPECIAL_DIRS = [GITHUB_DIR, DOCS_DIR].freeze
@@ -27,12 +30,15 @@ module JekyllReadmeIndex
 
     def generate(site)
       @site = site
+      @index_dirs = nil
       return if disabled?
 
       readmes.each do |readme|
         next unless should_be_index?(readme)
 
-        site.pages << readme.to_page
+        page = to_page(readme)
+        site.pages << page
+        add_index_dir(page.url)
         site.static_files.delete(readme) if cleanup?
       end
 
@@ -40,7 +46,7 @@ module JekyllReadmeIndex
         readmes_with_frontmatter.each do |readme|
           next unless should_be_index?(readme)
 
-          readme.update_permalink
+          add_index_dir(update_permalink(readme))
         end
       end
     end
@@ -60,7 +66,6 @@ module JekyllReadmeIndex
 
     # Prioritize READMEs according to GitHub's order: .github > root > docs
     # For each target directory, keep only the highest priority README
-    # rubocop:disable Metrics/PerceivedComplexity
     def prioritize_readmes(candidates)
       grouped = candidates.group_by do |file|
         # Get the directory that would become the index
@@ -80,8 +85,7 @@ module JekyllReadmeIndex
       grouped.flat_map do |_dir, files|
         # Sort by priority: .github first, then root, then docs, then others
         files.min_by do |file|
-          path = file.respond_to?(:relative_path) ? file.relative_path : "/" + file.path
-          case path
+          case readme_path(file)
           when GITHUB_README_PATTERN then 0
           when ROOT_README_PATTERN then 1
           when DOCS_README_PATTERN then 2
@@ -90,22 +94,81 @@ module JekyllReadmeIndex
         end
       end.compact
     end
-    # rubocop:enable Metrics/PerceivedComplexity
+
+    # Convert a README StaticFile to a Page that serves as its directory's index
+    def to_page(static_file)
+      # StaticFile doesn't expose its base, dir, or name (the last only since
+      # Jekyll 4), so read them the same way jekyll-optional-front-matter does.
+      base = static_file.instance_variable_get(:@base)
+      dir  = static_file.instance_variable_get(:@dir)
+      name = static_file.instance_variable_get(:@name)
+      page = Jekyll::Page.new(site, base, dir, name)
+
+      page.data["permalink"] = target_dir(static_file)
+      page
+    end
+
+    # Point a README Page's permalink at its directory
+    def update_permalink(page)
+      # If URL already ends with '/', it's a directory URL and should be used as-is
+      url = page.url
+      page.data["permalink"] = url.end_with?("/") ? url : target_dir(page)
+      # Page#url is memoized; drop it so it's rebuilt from the new permalink
+      page.instance_variable_set(:@url, nil)
+      page.url
+    end
+
+    # The directory a README should be the index for
+    def target_dir(file)
+      # For READMEs in .github or docs at root level, they should be the root index
+      return "/" if special_readme?(file)
+
+      File.join(File.dirname(file.url), "/")
+    end
+
+    # Check if this is a README in a special directory (.github or docs)
+    def special_readme?(file)
+      path = readme_path(file)
+      path =~ GITHUB_README_PATTERN || path =~ DOCS_README_PATTERN
+    end
+
+    # The file's path relative to the site source, with a leading slash.
+    #
+    # StaticFile#relative_path starts with "/", but Page#relative_path doesn't
+    # on Jekyll 4 (or for root pages on Jekyll 3), so the priority patterns
+    # never matched READMEs with front matter.
+    def readme_path(file)
+      path = file.relative_path
+      path.start_with?("/") ? path : "/#{path}"
+    end
 
     # Should the given readme be the containing directory's index?
     def should_be_index?(readme)
       return false unless readme
 
-      !dir_has_index? File.dirname(readme.url)
+      !dir_has_index? target_dir(readme)
     end
 
     # Does the given directory have an index?
     #
     # relative_path - the directory path relative to the site root
     def dir_has_index?(relative_path)
-      relative_path << "/" unless relative_path.end_with? "/"
-      regex = %r!^#{Regexp.escape(relative_path)}#{INDEX_REGEX}!i
-      (site.pages + site.static_files).any? { |file| file.url =~ regex }
+      relative_path = File.join(relative_path, "/") unless relative_path.end_with?("/")
+      index_dirs.include?(relative_path.downcase)
+    end
+
+    # The (downcased) directories that already have an index page or file.
+    # Built once per generate instead of scanning every file for every README.
+    def index_dirs
+      @index_dirs ||= Set.new.tap do |dirs|
+        site.pages.each { |page| add_index_dir(page.url, dirs) }
+        site.static_files.each { |file| add_index_dir(file.url, dirs) }
+      end
+    end
+
+    def add_index_dir(url, dirs = index_dirs)
+      match = INDEX_URL_REGEX.match(url)
+      dirs << match[1].downcase if match
     end
 
     # Regexp to match a file path against to detect if the given file is a README

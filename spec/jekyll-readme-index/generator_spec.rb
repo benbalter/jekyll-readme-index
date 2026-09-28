@@ -13,7 +13,7 @@ describe JekyllReadmeIndex::Generator do
   let(:readme_with_frontmatter) do
     readmes_with_frontmatter.find { |r| r.url =~ %r!#{dir}README\..*!i }
   end
-  let(:page) { readme.to_page }
+  let(:page) { subject.send(:to_page, readme) }
   let(:should_be_index?) { subject.send(:should_be_index?, readme) }
   let(:index_name) { "index.html" }
   let(:index_path) { File.join(site.dest, dir, index_name) }
@@ -542,7 +542,7 @@ describe JekyllReadmeIndex::Generator do
 
         # Manually set the URL to a file URL and call update_permalink again
         readme_page.instance_variable_set(:@url, "/a/b/README.html")
-        readme_page.update_permalink
+        subject.send(:update_permalink, readme_page)
 
         expect(readme_page.url).to eql("/a/b/")
       end
@@ -790,6 +790,64 @@ describe JekyllReadmeIndex::Generator do
         expected = "<h1 id=\"github-readme-priority-1\">GitHub README (Priority 1)</h1>\n"
         expect(index_content).to eql(expected)
       end
+    end
+  end
+
+  context "with priority order for READMEs with front matter" do
+    let(:fixture) { "priority-test-with-frontmatter" }
+
+    it "prioritizes .github/README.md over others" do
+      expect(readmes_with_frontmatter.map(&:path)).to eql([".github/README.md"])
+    end
+
+    it "uses .github/README.md as the root index" do
+      subject.generate(site)
+      urls = site.pages.to_h { |p| [p.path, p.url] }
+      expect(urls[".github/README.md"]).to eql("/")
+      expect(urls["README.md"]).to eql("/README.html")
+      expect(urls["docs/README.md"]).to eql("/docs/README.html")
+    end
+
+    context "when building" do
+      before { site.process }
+
+      it "renders the .github readme, not root or docs" do
+        expected = "<h1 id=\"github-readme-priority-1\">GitHub README (Priority 1)</h1>\n"
+        expect(index_content).to eql(expected)
+      end
+    end
+  end
+
+  context "with .github/README.md and a root index" do
+    let(:fixture) { "github-readme-and-index" }
+
+    it "knows the .github readme shouldn't be the index" do
+      expect(subject.send(:should_be_index?, readmes.first)).to be(false)
+    end
+
+    it "doesn't create a second root index page" do
+      subject.generate(site)
+      expect(site.pages.map(&:name)).not_to include("README.md")
+    end
+  end
+
+  context "detecting indexes" do
+    let(:fixture) { "readme-and-nested-readme" }
+
+    it "matches directories and index files case-insensitively" do
+      expect(subject.send(:dir_has_index?, "/with_readme_and_index")).to be(true)
+      expect(subject.send(:dir_has_index?, "/WITH_README_AND_INDEX/")).to be(true)
+      expect(subject.send(:dir_has_index?, "/with_readme")).to be(false)
+    end
+
+    it "sees indexes added during generation" do
+      subject.send(:add_index_dir, "/with_readme/Index.XHTML")
+      expect(subject.send(:dir_has_index?, "/with_readme")).to be(true)
+    end
+
+    it "doesn't treat other files as indexes" do
+      subject.send(:add_index_dir, "/without_readme/other.html")
+      expect(subject.send(:dir_has_index?, "/without_readme")).to be(false)
     end
   end
 
