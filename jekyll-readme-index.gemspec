@@ -10,6 +10,14 @@ Gem::Specification.new do |s|
   s.email         = ["ben.balter@github.com"]
   s.homepage      = "https://github.com/benbalter/jekyll-readme-index"
   s.summary       = "A Jekyll plugin to render a project's README as the site's index."
+  s.description   = "Jekyll plugin that uses README.md as your site's index page, no " \
+                    "index.md needed. Supported on GitHub Pages."
+  s.metadata      = {
+    "homepage_uri"    => "https://github.com/benbalter/jekyll-readme-index",
+    "source_code_uri" => "https://github.com/benbalter/jekyll-readme-index",
+    "bug_tracker_uri" => "https://github.com/benbalter/jekyll-readme-index/issues",
+    "changelog_uri"   => "https://github.com/benbalter/jekyll-readme-index/releases",
+  }
 
   s.files         = `git ls-files app lib`.split("\n")
   s.platform      = Gem::Platform::RUBY
