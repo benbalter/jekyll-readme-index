@@ -1,6 +1,6 @@
 # Jekyll Readme Index
 
-A Jekyll plugin to render a project's README as the site's index.
+Jekyll plugin that uses README.md as your site's index page, no index.md needed. Supported on GitHub Pages.
 
 [![CI](https://github.com/benbalter/jekyll-readme-index/actions/workflows/ci.yml/badge.svg)](https://github.com/benbalter/jekyll-readme-index/actions/workflows/ci.yml)
 
