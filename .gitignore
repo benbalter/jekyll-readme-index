@@ -6,3 +6,4 @@ Gemfile.lock
 spec/fixtures/**/.jekyll-cache
 vendor/
 .bundle/
+/pkg/
