@@ -29,6 +29,7 @@ Gem::Specification.new do |s|
   # itself doesn't parse Markdown, Jekyll 4 depends on it directly, and
   # github-pages pins it.
   s.add_development_dependency "kramdown-parser-gfm", "~> 1.1"
+  s.add_development_dependency "rake", "~> 13.0"
   s.add_development_dependency "rspec", "~> 3.13"
   s.add_development_dependency "rubocop", "~> 1.57"
   s.add_development_dependency "rubocop-jekyll", "~> 0.14"
