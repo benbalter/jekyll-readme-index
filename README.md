@@ -36,6 +36,7 @@ readme_index:
   remove_originals: false
   with_frontmatter: false
   readme_pattern:   nil
+  append_html:      false
 ```
 
 ### GitHub-style README locations
@@ -69,6 +70,16 @@ This allows you to use a different filename or pattern for your README files. Th
 ### Removing originals
 
 By default the original README markdown files will be included as static pages in the output. To remove them from the output, set the `remove_originals` key to `true`.
+
+### Appending HTML to index URLs
+
+By default, generated index URLs end with a slash. Set `append_html` to `true`
+to generate explicit `index.html` URLs instead:
+
+```yml
+readme_index:
+  append_html: true
+```
 
 ### Disabling
 

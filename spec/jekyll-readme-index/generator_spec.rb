@@ -851,6 +851,45 @@ describe JekyllReadmeIndex::Generator do
     end
   end
 
+  context "when append_html is enabled" do
+    let(:fixture) { "readme-no-index" }
+    let(:overrides) { { "readme_index" => { "append_html" => true } } }
+
+    it "uses an explicit index.html permalink" do
+      expect(page.data["permalink"]).to eql("/index.html")
+      expect(page.url).to eql("/index.html")
+    end
+
+    it "writes the generated index" do
+      site.process
+      expect(index_path).to be_an_existing_file
+    end
+  end
+
+  context "when append_html and with_frontmatter are enabled" do
+    let(:overrides) { { "readme_index" => { "append_html" => true, "with_frontmatter" => true } } }
+
+    context "with a nested README" do
+      let(:fixture) { "nested-readme-with-frontmatter" }
+
+      it "uses an explicit index.html permalink" do
+        subject.generate(site)
+        readme_page = site.pages.find { |p| p.path == "a/b/README.md" }
+        expect(readme_page.url).to eql("/a/b/index.html")
+      end
+    end
+
+    context "with a README that sets a directory permalink" do
+      let(:fixture) { "readme-with-directory-permalink" }
+
+      it "appends index.html to the custom permalink" do
+        subject.generate(site)
+        readme_page = site.pages.find { |p| p.path == "d/e/README.md" }
+        expect(readme_page.url).to eql("/d/e/index.html")
+      end
+    end
+  end
+
   context "with custom readme_pattern" do
     let(:fixture) { "readme-no-index" }
     let(:overrides) { { "readme_index" => { "readme_pattern" => "/custom-readme\\.md$" } } }

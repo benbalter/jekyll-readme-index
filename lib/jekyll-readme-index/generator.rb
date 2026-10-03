@@ -23,6 +23,7 @@ module JekyllReadmeIndex
     CLEANUP_KEY = "remove_originals"
     FRONTMATTER_KEY = "with_frontmatter"
     PATTERN_KEY = "readme_pattern"
+    APPEND_HTML_KEY = "append_html"
 
     def initialize(site)
       @site = site
@@ -104,7 +105,7 @@ module JekyllReadmeIndex
       name = static_file.instance_variable_get(:@name)
       page = Jekyll::Page.new(site, base, dir, name)
 
-      page.data["permalink"] = target_dir(static_file)
+      page.data["permalink"] = target_permalink(static_file)
       page
     end
 
@@ -112,7 +113,11 @@ module JekyllReadmeIndex
     def update_permalink(page)
       # If URL already ends with '/', it's a directory URL and should be used as-is
       url = page.url
-      page.data["permalink"] = url.end_with?("/") ? url : target_dir(page)
+      page.data["permalink"] = if url.end_with?("/")
+                                 append_html? ? File.join(url, "index.html") : url
+                               else
+                                 target_permalink(page)
+                               end
       # Page#url is memoized; drop it so it's rebuilt from the new permalink
       page.instance_variable_set(:@url, nil)
       page.url
@@ -124,6 +129,11 @@ module JekyllReadmeIndex
       return "/" if special_readme?(file)
 
       File.join(File.dirname(file.url), "/")
+    end
+
+    def target_permalink(file)
+      dir = target_dir(file)
+      append_html? ? File.join(dir, "index.html") : dir
     end
 
     # Check if this is a README in a special directory (.github or docs)
@@ -202,6 +212,10 @@ module JekyllReadmeIndex
 
     def with_frontmatter?
       option(FRONTMATTER_KEY) == true
+    end
+
+    def append_html?
+      option(APPEND_HTML_KEY) == true
     end
 
     # Helper method to get the file path (URL or path) for a file object
