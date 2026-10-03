@@ -113,10 +113,10 @@ module JekyllReadmeIndex
     def update_permalink(page)
       # If URL already ends with '/', it's a directory URL and should be used as-is
       url = page.url
-      page.data["permalink"] = if append_html?
-                                 target_permalink(page)
+      page.data["permalink"] = if url.end_with?("/")
+                                 append_html? ? File.join(url, "index.html") : url
                                else
-                                 url.end_with?("/") ? url : target_dir(page)
+                                 target_permalink(page)
                                end
       # Page#url is memoized; drop it so it's rebuilt from the new permalink
       page.instance_variable_set(:@url, nil)
