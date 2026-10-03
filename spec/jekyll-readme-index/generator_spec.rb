@@ -851,6 +851,21 @@ describe JekyllReadmeIndex::Generator do
     end
   end
 
+  context "when append_html is enabled" do
+    let(:fixture) { "readme-no-index" }
+    let(:overrides) { { "readme_index" => { "append_html" => true } } }
+
+    it "uses an explicit index.html permalink" do
+      expect(page.data["permalink"]).to eql("/index.html")
+      expect(page.url).to eql("/index.html")
+    end
+
+    it "writes the generated index" do
+      site.process
+      expect(index_path).to be_an_existing_file
+    end
+  end
+
   context "with custom readme_pattern" do
     let(:fixture) { "readme-no-index" }
     let(:overrides) { { "readme_index" => { "readme_pattern" => "/custom-readme\\.md$" } } }
