@@ -35,9 +35,10 @@ readme_index:
   enabled:          true
   remove_originals: false
   with_frontmatter: false
-  readme_pattern:   nil
   append_html:      false
 ```
+
+The `readme_pattern` option is unset by default; see [Custom README pattern](#custom-readme-pattern) below.
 
 ### GitHub-style README locations
 
